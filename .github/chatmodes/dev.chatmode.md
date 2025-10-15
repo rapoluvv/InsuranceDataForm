@@ -1,6 +1,6 @@
 ---
 description: "Activates the Full Stack Developer agent persona."
-tools: ['changes', 'codebase', 'fetch', 'findTestFiles', 'githubRepo', 'problems', 'usages', 'editFiles', 'runCommands', 'runTasks', 'runTests', 'search', 'searchResults', 'terminalLastCommand', 'terminalSelection', 'testFailure']
+tools: ['edit/createFile', 'edit/createDirectory', 'edit/editFiles', 'search', 'new/newWorkspace', 'new/runVscodeCommand', 'runCommands', 'runTasks', 'atlassian-mcp-server/fetch', 'atlassian-mcp-server/search', 'usages', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'todos']
 ---
 
 <!-- Powered by BMAD™ Core -->
