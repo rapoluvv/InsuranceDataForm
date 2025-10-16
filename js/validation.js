@@ -1,0 +1,245 @@
+/**
+ * Validation Module - Handles all validation logic
+ * Validates fields, Aadhaar, PAN, age calculations, nominee shares
+ */
+
+/**
+ * Calculate age from date of birth
+ * @param {string} dobString - Date of birth in ISO format
+ * @returns {Object|null} Age object with years, months, days or null if invalid
+ */
+function calculateAgeFromDOB(dobString) {
+    if (!dobString) return null;
+    const dob = new Date(dobString);
+    if (isNaN(dob)) return null;
+    const now = new Date();
+    const y1 = dob.getFullYear(), m1 = dob.getMonth(), d1 = dob.getDate();
+    const y2 = now.getFullYear(), m2 = now.getMonth(), d2 = now.getDate();
+
+    let years = y2 - y1;
+    let months = m2 - m1;
+    let days = d2 - d1;
+
+    if (days < 0) {
+        const prevMonth = new Date(y2, m2, 0);
+        days += prevMonth.getDate();
+        months -= 1;
+    }
+    if (months < 0) {
+        months += 12;
+        years -= 1;
+    }
+    if (years < 0) return null;
+    return { years, months, days };
+}
+
+/**
+ * Format age object to readable string
+ * @param {Object} ageObj - Age object with years, months, days
+ * @returns {string} Formatted age string
+ */
+function formatAgeObject(ageObj) {
+    if (!ageObj) return '';
+    const parts = [];
+    if (typeof ageObj.years === 'number') parts.push(`${ageObj.years} Year${ageObj.years !== 1 ? 's' : ''}`);
+    if (typeof ageObj.months === 'number') parts.push(`${ageObj.months} Month${ageObj.months !== 1 ? 's' : ''}`);
+    if (typeof ageObj.days === 'number') parts.push(`${ageObj.days} Day${ageObj.days !== 1 ? 's' : ''}`);
+    return parts.join(', ');
+}
+
+/**
+ * Update age field from DOB input
+ * @param {string} dobValue - Date of birth value
+ */
+function updateAgeFieldFromDOB(dobValue) {
+    const ageStr = formatAgeObject(calculateAgeFromDOB(dobValue));
+    const ageEl = document.getElementById('near_lb_age');
+    if (ageEl) ageEl.value = ageStr || '';
+}
+
+/**
+ * Validate Aadhaar number (must be 12 digits)
+ * @param {string} aadhaar - Aadhaar number to validate
+ * @returns {boolean} True if valid
+ */
+function validateAadhaar(aadhaar) {
+    if (!aadhaar) return true; // Optional field
+    return /^\d{12}$/.test(aadhaar);
+}
+
+/**
+ * Validate PAN number (format: AAAAA9999A)
+ * @param {string} pan - PAN number to validate
+ * @returns {boolean} True if valid
+ */
+function validatePAN(pan) {
+    if (!pan) return true; // Optional field
+    return /^[A-Z]{5}\d{4}[A-Z]$/.test(pan);
+}
+
+/**
+ * Validate email address
+ * @param {string} email - Email address to validate
+ * @returns {boolean} True if valid
+ */
+function validateEmail(email) {
+    if (!email) return true; // Optional field
+    return /^\S+@\S+\.\S+$/.test(email);
+}
+
+/**
+ * Validate mobile number (10 digits)
+ * @param {string} mobile - Mobile number to validate
+ * @returns {boolean} True if valid
+ */
+function validateMobile(mobile) {
+    if (!mobile) return true; // Check required separately
+    return /^\d{10}$/.test(mobile);
+}
+
+/**
+ * Validate that nominee shares add up to 100%
+ * @returns {boolean} True if valid
+ */
+function validateNomineeShares() {
+    const errEl = document.getElementById('nominee-error');
+    if (!errEl) return true;
+    
+    // Get nominees from repeater if getNomineesFromRepeater is available
+    const nominees = (typeof window.getNomineesFromRepeater === 'function') 
+        ? window.getNomineesFromRepeater() 
+        : [];
+    
+    if (nominees.length === 0) { 
+        errEl.textContent = ''; 
+        return true; 
+    }
+    
+    const sum = nominees.reduce((s, n) => s + (parseFloat(n.share) || 0), 0);
+    if (Math.abs(sum - 100) > 0.001) {
+        errEl.textContent = `Total nominee shares must equal 100%. Current total: ${sum}%`;
+        return false;
+    }
+    errEl.textContent = '';
+    return true;
+}
+
+/**
+ * Validate a single form tab
+ * @param {number} tabIndex - Index of the tab to validate
+ * @param {NodeList} formTabPanels - All form tab panels
+ * @returns {boolean} True if valid
+ */
+function validateTab(tabIndex, formTabPanels) {
+    let isValid = true;
+    const panel = formTabPanels[tabIndex];
+    panel.querySelectorAll('.error-message').forEach(err => err.textContent = '');
+
+    const inputs = panel.querySelectorAll('input[required], select[required], input[type="email"], input[type="tel"], input[min]');
+    inputs.forEach(input => {
+        let errorMessage = '';
+        if (input.required && !input.value.trim()) {
+            errorMessage = 'This field is required.';
+        } else if (input.type === 'email' && input.value && !validateEmail(input.value)) {
+            errorMessage = 'Please enter a valid email address.';
+        } else if (input.type === 'tel' && input.value && input.pattern && !new RegExp(input.pattern).test(input.value)) {
+            errorMessage = input.title || 'Please enter a valid number.';
+        } else if (input.type === 'number' && input.min !== '' && input.value !== '' && parseFloat(input.value) < parseFloat(input.min)) {
+            errorMessage = `Value cannot be less than ${input.min}.`;
+        } else if (input.id === 'aadhaar' && input.value && !validateAadhaar(input.value)) {
+            errorMessage = 'Aadhaar must be exactly 12 digits.';
+        } else if (input.id === 'pan' && input.value && !validatePAN(input.value)) {
+            errorMessage = 'PAN must be in format: AAAAA9999A (5 letters, 4 digits, 1 letter).';
+        }
+        
+        if (errorMessage) {
+            isValid = false;
+            const errorSpan = input.parentElement.querySelector('.error-message');
+            if(errorSpan) errorSpan.textContent = errorMessage;
+        }
+    });
+    return isValid;
+}
+
+/**
+ * Validate all form tabs
+ * @param {NodeList} formTabPanels - All form tab panels
+ * @returns {Object} Validation result with isValid flag and first invalid details
+ */
+function validateAllTabs(formTabPanels) {
+    let allTabsValid = true;
+    let firstInvalidInput = null;
+    let firstInvalidTab = null;
+    
+    for (let i = 0; i < formTabPanels.length; i++) {
+        const panel = formTabPanels[i];
+        panel.querySelectorAll('.error-message').forEach(err => err.textContent = '');
+        const inputs = panel.querySelectorAll('input[required], select[required], input[type="email"], input[type="tel"], input[min]');
+        inputs.forEach(input => {
+            let errorMessage = '';
+            if (input.required && !input.value.trim()) {
+                errorMessage = 'This field is required.';
+            } else if (input.type === 'email' && input.value && !validateEmail(input.value)) {
+                errorMessage = 'Please enter a valid email address.';
+            } else if (input.type === 'tel' && input.required && input.value && input.pattern && !new RegExp(input.pattern).test(input.value)) {
+                errorMessage = input.title || 'Please enter a valid 10-digit mobile number.';
+            } else if (input.type === 'number' && input.min !== '' && input.value !== '' && parseFloat(input.value) < parseFloat(input.min)) {
+                errorMessage = `Value cannot be less than ${input.min}.`;
+            } else if (input.id === 'aadhaar' && input.value && !validateAadhaar(input.value)) {
+                errorMessage = 'Aadhaar must be exactly 12 digits.';
+            } else if (input.id === 'pan' && input.value && !validatePAN(input.value)) {
+                errorMessage = 'PAN must be in format: AAAAA9999A (5 letters, 4 digits, 1 letter).';
+            }
+
+            if (errorMessage) {
+                allTabsValid = false;
+                const errorSpan = input.parentElement.querySelector('.error-message');
+                if (errorSpan) errorSpan.textContent = errorMessage;
+                if (!firstInvalidInput) {
+                    firstInvalidInput = input;
+                    firstInvalidTab = i;
+                }
+            }
+        });
+    }
+
+    const nomineeSharesValid = validateNomineeShares();
+    if (!nomineeSharesValid) {
+        allTabsValid = false;
+    }
+
+    return {
+        isValid: allTabsValid,
+        firstInvalidInput,
+        firstInvalidTab
+    };
+}
+
+// Browser-compatible exports
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        calculateAgeFromDOB,
+        formatAgeObject,
+        updateAgeFieldFromDOB,
+        validateAadhaar,
+        validatePAN,
+        validateEmail,
+        validateMobile,
+        validateNomineeShares,
+        validateTab,
+        validateAllTabs
+    };
+} else {
+    window.ValidationModule = {
+        calculateAgeFromDOB,
+        formatAgeObject,
+        updateAgeFieldFromDOB,
+        validateAadhaar,
+        validatePAN,
+        validateEmail,
+        validateMobile,
+        validateNomineeShares,
+        validateTab,
+        validateAllTabs
+    };
+}
