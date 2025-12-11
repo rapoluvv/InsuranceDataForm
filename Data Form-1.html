@@ -762,6 +762,34 @@
                 width: 2.25rem;
                 height: 2.25rem;
             }
+
+            /* Mobile Header Fixes */
+            .max-w-4xl>.relative.flex {
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 1rem;
+                padding-top: 3rem;
+                /* Space for theme toggle */
+            }
+
+            .max-w-4xl>.relative.flex>.absolute {
+                position: static !important;
+                width: 100%;
+                text-align: center !important;
+            }
+
+            .max-w-4xl>.relative.flex img {
+                height: 3rem !important;
+                margin: 0 auto;
+            }
+
+            .max-w-4xl>.relative.flex h1 {
+                font-size: 1.5rem !important;
+            }
+
+            .max-w-4xl>.relative.flex h2 {
+                font-size: 1rem !important;
+            }
         }
     </style>
 </head>
