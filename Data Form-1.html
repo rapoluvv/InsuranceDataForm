@@ -595,6 +595,120 @@
             color: white;
         }
 
+        /* ===== STEPPER / WIZARD STYLES ===== */
+        .stepper-container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding: 0 0.5rem;
+            position: relative;
+        }
+
+        .stepper-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .stepper-step:hover .step-circle {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* Connecting line between steps */
+        .stepper-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 1.25rem;
+            left: calc(50% + 1.5rem);
+            width: calc(100% - 3rem);
+            height: 3px;
+            background: var(--border);
+            z-index: 0;
+            transition: background 0.4s ease;
+        }
+
+        .stepper-step.completed:not(:last-child)::after {
+            background: linear-gradient(90deg, var(--primary-start), var(--primary-end));
+        }
+
+        .step-circle {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            color: var(--text-muted);
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .stepper-step.active .step-circle {
+            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 4px 25px rgba(99, 102, 241, 0.6);
+            }
+        }
+
+        .stepper-step.completed .step-circle {
+            background: linear-gradient(135deg, var(--success), #059669);
+            border-color: transparent;
+            color: white;
+        }
+
+        .stepper-step.completed .step-circle::after {
+            content: '✓';
+            font-size: 1rem;
+        }
+
+        .stepper-step.completed .step-number {
+            display: none;
+        }
+
+        .step-label {
+            margin-top: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-align: center;
+            max-width: 5rem;
+            line-height: 1.2;
+            transition: color 0.3s ease;
+        }
+
+        .stepper-step.active .step-label {
+            color: var(--primary-start);
+            font-weight: 600;
+        }
+
+        .stepper-step.completed .step-label {
+            color: var(--success);
+        }
+
         /* Responsive Adjustments */
         @media (max-width: 640px) {
             .theme-toggle {
@@ -612,6 +726,41 @@
             .main-tab-button {
                 padding: 0.625rem 1.25rem;
                 font-size: 0.875rem;
+            }
+
+            /* Stepper mobile adjustments */
+            .stepper-container {
+                margin-bottom: 1.5rem;
+                padding: 0;
+            }
+
+            .step-circle {
+                width: 2rem;
+                height: 2rem;
+                font-size: 0.75rem;
+            }
+
+            .step-label {
+                font-size: 0.6rem;
+                max-width: 3.5rem;
+            }
+
+            .stepper-step:not(:last-child)::after {
+                top: 1rem;
+                left: calc(50% + 1.25rem);
+                width: calc(100% - 2.5rem);
+                height: 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .step-label {
+                display: none;
+            }
+
+            .step-circle {
+                width: 2.25rem;
+                height: 2.25rem;
             }
         }
     </style>
@@ -651,21 +800,9 @@
                         Submitted Data</button>
                 </div>
 
-                <!-- Progress Indicator -->
-                <div class="mb-4">
-                    <div class="flex justify-between text-sm text-gray-600 mb-1">
-                        <span>Form Progress</span>
-                        <span id="progress-text">1 of 7</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                            style="width: 14.29%"></div>
-                    </div>
-                </div>
-
-                <!-- Form Tab Navigation -->
-                <div id="form-tabs-nav" class="flex border-b border-gray-200 mb-6 overflow-x-auto">
-                    <!-- Tabs will be generated here by JS -->
+                <!-- Stepper/Wizard Navigation -->
+                <div id="form-tabs-nav" class="stepper-container">
+                    <!-- Stepper steps will be generated here by JS -->
                 </div>
                 <form id="data-form">
                     <!-- Applicant Details -->

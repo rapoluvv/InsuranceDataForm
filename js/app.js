@@ -144,17 +144,32 @@ function updateDeliveryVisibility() {
     }
 }
 
-// Form tab navigation
+// Form tab navigation - Stepper/Wizard version
 function initializeFormTabs() {
     formTabsNav.innerHTML = '';
     formTabPanels.forEach((panel, index) => {
         const tabName = panel.getAttribute('data-tab-name');
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.innerText = tabName;
-        button.className = 'form-tab-button font-semibold text-gray-600 focus:outline-none';
-        if (index === 0) button.classList.add('active');
-        button.onclick = () => {
+
+        // Create stepper step
+        const step = document.createElement('div');
+        step.className = 'stepper-step';
+        step.setAttribute('data-step-index', index);
+        if (index === 0) step.classList.add('active');
+
+        // Create step circle
+        const circle = document.createElement('div');
+        circle.className = 'step-circle';
+        circle.innerHTML = `<span class="step-number">${index + 1}</span>`;
+
+        // Create step label
+        const label = document.createElement('div');
+        label.className = 'step-label';
+        label.textContent = tabName;
+
+        step.appendChild(circle);
+        step.appendChild(label);
+
+        step.onclick = () => {
             if (index > currentFormTabIndex) {
                 if (typeof window.validateTab === 'function' && !window.validateTab(currentFormTabIndex, formTabPanels)) {
                     alert('Please fill all mandatory fields in the current tab before proceeding.');
@@ -163,28 +178,32 @@ function initializeFormTabs() {
             }
             showFormTab(index);
         };
-        formTabsNav.appendChild(button);
+
+        formTabsNav.appendChild(step);
     });
 }
 
 function updateProgress() {
-    const totalTabs = formTabPanels.length;
-    const current = currentFormTabIndex + 1;
-    const percentage = (current / totalTabs) * 100;
-    document.getElementById('progress-bar').style.width = percentage + '%';
-    document.getElementById('progress-text').textContent = current + ' of ' + totalTabs;
+    // Update stepper states instead of progress bar
+    const steps = formTabsNav.querySelectorAll('.stepper-step');
+    steps.forEach((step, index) => {
+        step.classList.remove('active', 'completed');
+        if (index < currentFormTabIndex) {
+            step.classList.add('completed');
+        } else if (index === currentFormTabIndex) {
+            step.classList.add('active');
+        }
+    });
 }
 
 function showFormTab(tabIndex) {
     formTabPanels.forEach(panel => panel.classList.add('hidden'));
     formTabPanels[tabIndex].classList.remove('hidden');
-    const navButtons = formTabsNav.querySelectorAll('button');
-    navButtons.forEach((button, index) => button.classList.toggle('active', index === tabIndex));
     currentFormTabIndex = tabIndex;
     updateProgress();
-    try { 
+    try {
         if (typeof window.scrollElementToTop === 'function') {
-            window.scrollElementToTop(formTabPanels[tabIndex]); 
+            window.scrollElementToTop(formTabPanels[tabIndex]);
         }
     } catch (e) { /* ignore */ }
 }
@@ -289,7 +308,7 @@ async function editRow(index) {
         if (!el) return;
         // For income fields, format for display
         try {
-            if (['a_income','ly_income1','ly_income2','ly_income3','husband_annual_income'].includes(key)) {
+            if (['a_income', 'ly_income1', 'ly_income2', 'ly_income3', 'husband_annual_income'].includes(key)) {
                 el.value = row[key] ? formatIndianNumber(stripFormatting(row[key])) : '';
             } else {
                 el.value = row[key] || '';
@@ -338,7 +357,7 @@ async function editRow(index) {
         if (row.dating_back) updateDatingBackVisibility(row.dating_back);
         if (row.any_operations) updateOperationsVisibility(row.any_operations);
         if (row.any_diseases) updateDiseasesVisibility(row.any_diseases);
-        ['father','mother','spouse'].forEach(role => {
+        ['father', 'mother', 'spouse'].forEach(role => {
             const key = `fam_${role}_state`;
             if (row[key]) updateParentDeathVisibility(role, row[key]);
         });
@@ -365,7 +384,7 @@ async function openRowDetails(index) {
 
     // Get CSV_HEADERS and form structure
     const CSV_HEADERS = DataModule.CSV_HEADERS;
-    
+
     // Set modal title
     document.getElementById('row-modal-title').innerText = row.name_of_la || ('Record #' + (index + 1));
 
@@ -398,33 +417,33 @@ async function openRowDetails(index) {
     // Compute visible fields based on form rules
     function computeVisibleForRow(r) {
         const visible = new Set(CSV_HEADERS);
-        
+
         // Marriage-dependent fields
         if (r.marital_status !== 'Married') {
             visible.delete('spouse');
             visible.delete('d_marriage');
         }
-        
+
         // Dating back visibility
         if (r.dating_back !== 'Yes') {
             visible.delete('dating_back_date');
         }
-        
+
         // Operations visibility
         if (r.operations !== 'Yes') {
             visible.delete('operations_details');
         }
-        
+
         // Diseases visibility
         if (r.any_diseases !== 'Yes') {
             visible.delete('any_diseases_details');
         }
-        
+
         // Correspondence address visibility
         if (r.corr_same_kyc === 'true' || r.corr_same_kyc === true) {
             visible.delete('corr_address');
         }
-        
+
         // Pregnancy/Husband visibility (gender-dependent)
         if (r.gender !== 'Female') {
             visible.delete('pregnant');
@@ -440,7 +459,7 @@ async function openRowDetails(index) {
                 visible.delete('last_delivery_date');
             }
         }
-        
+
         // Parent death details visibility
         if (r.father_state !== 'Dead') {
             visible.delete('father_died_age');
@@ -457,7 +476,7 @@ async function openRowDetails(index) {
             visible.delete('spouse_died_year');
             visible.delete('spouse_died_cause');
         }
-        
+
         // Sibling/child repeater fields
         const repeaterPrefixes = ['fam_brother_', 'fam_sister_', 'fam_child_'];
         repeaterPrefixes.forEach(prefix => {
@@ -465,19 +484,19 @@ async function openRowDetails(index) {
                 if (k.startsWith(prefix)) visible.delete(k);
             });
         });
-        
+
         return visible;
     }
-    
+
     const visibleFields = computeVisibleForRow(row);
 
     // Populate Overview tab
     const overviewEl = document.getElementById('row-modal-overview');
     overviewEl.innerHTML = '';
-    
+
     Object.entries(grouped).forEach(([sectionName, keys]) => {
         if (sectionName === 'Other' || keys.length === 0) return;
-        
+
         const keysFiltered = keys.filter(k => CSV_HEADERS.includes(k));
         if (keysFiltered.length === 0) return;
 
@@ -539,7 +558,7 @@ async function openRowDetails(index) {
                     overviewEl.appendChild(itemHeader);
 
                     const state = it.state || it.fam_brother_state || it.fam_sister_state || it.fam_child_state;
-                    
+
                     const fields = [
                         { label: 'Age', value: it.age || it.fam_brother_age || it.fam_sister_age || it.fam_child_age },
                         { label: 'State', value: state }
@@ -611,7 +630,7 @@ async function openRowDetails(index) {
     const prevDetailEl = document.getElementById('prevpol-detail');
     prevListEl.innerHTML = '';
     prevDetailEl.innerHTML = '';
-    
+
     let policies = Array.isArray(row.previous_policies) ? row.previous_policies : [];
     if ((!policies || policies.length === 0) && (row.prev_policy_no || row.prev_plan_term || row.prev_y_premium)) {
         policies = [{
@@ -659,9 +678,9 @@ async function openRowDetails(index) {
             });
             prevListEl.appendChild(btn);
         });
-        setTimeout(() => { 
-            const firstBtn = prevListEl.querySelector('button'); 
-            if (firstBtn) firstBtn.click(); 
+        setTimeout(() => {
+            const firstBtn = prevListEl.querySelector('button');
+            if (firstBtn) firstBtn.click();
         }, 20);
     }
 
@@ -692,13 +711,13 @@ async function openRowDetails(index) {
         bodyPrev.classList.add('hidden');
         const bodyNom = document.getElementById('row-modal-nominee');
         if (bodyNom) bodyNom.classList.add('hidden');
-        try { 
-            const modalContent = document.getElementById('row-details-modal').querySelector('.modal-content'); 
-            UIModule.scrollElementToTop(modalContent); 
-            UIModule.scrollElementToTop(bodyOverview); 
+        try {
+            const modalContent = document.getElementById('row-details-modal').querySelector('.modal-content');
+            UIModule.scrollElementToTop(modalContent);
+            UIModule.scrollElementToTop(bodyOverview);
         } catch (e) { /* ignore */ }
     }
-    
+
     function activatePrev() {
         const tabNomLocal = document.getElementById('modal-tab-nominee');
         [tabOverview, tabPrev, tabNomLocal].forEach(t => {
@@ -711,10 +730,10 @@ async function openRowDetails(index) {
         bodyOverview.classList.add('hidden');
         const bodyNom = document.getElementById('row-modal-nominee');
         if (bodyNom) bodyNom.classList.add('hidden');
-        try { 
-            const modalContent = document.getElementById('row-details-modal').querySelector('.modal-content'); 
-            UIModule.scrollElementToTop(modalContent); 
-            UIModule.scrollElementToTop(bodyPrev); 
+        try {
+            const modalContent = document.getElementById('row-details-modal').querySelector('.modal-content');
+            UIModule.scrollElementToTop(modalContent);
+            UIModule.scrollElementToTop(bodyPrev);
         } catch (e) { /* ignore */ }
     }
 
@@ -727,10 +746,10 @@ async function openRowDetails(index) {
         if (bodyNom) bodyNom.classList.remove('hidden');
         bodyOverview.classList.add('hidden');
         bodyPrev.classList.add('hidden');
-        try { 
-            const modalContent = document.getElementById('row-details-modal').querySelector('.modal-content'); 
-            UIModule.scrollElementToTop(modalContent); 
-            UIModule.scrollElementToTop(bodyNom); 
+        try {
+            const modalContent = document.getElementById('row-details-modal').querySelector('.modal-content');
+            UIModule.scrollElementToTop(modalContent);
+            UIModule.scrollElementToTop(bodyNom);
         } catch (e) { /* ignore */ }
     }
 
@@ -811,7 +830,7 @@ async function openRowDetails(index) {
     // Show modal and activate overview tab
     document.getElementById('row-details-modal').classList.remove('hidden');
     activateOverview();
-    
+
     try {
         const modal = document.getElementById('row-details-modal');
         const modalContent = modal.querySelector('.modal-content');
@@ -826,7 +845,7 @@ function createPreviousPolicyNode(data = {}) {
     const tpl = document.getElementById('previous-policy-template');
     if (!tpl) return null;
     const node = tpl.content.firstElementChild.cloneNode(true);
-    const map = ['prev_policy_no','prev_branch','prev_plan_term','prev_sa','prev_y_premium','prev_ab_addb','prev_doc','prev_mode','prev_or','prev_m_nm','prev_inforce'];
+    const map = ['prev_policy_no', 'prev_branch', 'prev_plan_term', 'prev_sa', 'prev_y_premium', 'prev_ab_addb', 'prev_doc', 'prev_mode', 'prev_or', 'prev_m_nm', 'prev_inforce'];
     const classMap = {
         prev_policy_no: 'prev-policy-no',
         prev_branch: 'prev-branch',
@@ -858,7 +877,7 @@ function getPreviousPoliciesFromRepeater() {
     const items = Array.from(container.querySelectorAll('.previous-policy-item'));
     return items.map(item => {
         const obj = {};
-        const keys = ['prev_policy_no','prev_branch','prev_plan_term','prev_sa','prev_y_premium','prev_ab_addb','prev_doc','prev_mode','prev_or','prev_m_nm','prev_inforce'];
+        const keys = ['prev_policy_no', 'prev_branch', 'prev_plan_term', 'prev_sa', 'prev_y_premium', 'prev_ab_addb', 'prev_doc', 'prev_mode', 'prev_or', 'prev_m_nm', 'prev_inforce'];
         const classMap = {
             prev_policy_no: 'prev-policy-no',
             prev_branch: 'prev-branch',
@@ -907,16 +926,16 @@ function createSiblingNode(data = {}, role = 'Sibling', index = null) {
     const diedYearEl = node.querySelector('.sibling-died-year');
     const diedCauseEl = node.querySelector('.sibling-died-cause');
     const deathContainer = node.querySelector('.sibling-death-container');
-    
+
     const header = node.querySelector('.sibling-header');
     if (header) header.textContent = `${role}${index ? ' ' + index : ''}`;
-    
+
     if (ageEl && typeof data.age !== 'undefined') ageEl.value = data.age;
     if (stateEl && data.state) stateEl.value = data.state;
     if (diedAgeEl && data.died_age) diedAgeEl.value = data.died_age;
     if (diedYearEl && data.died_year) diedYearEl.value = data.died_year;
     if (diedCauseEl && data.died_cause) diedCauseEl.value = data.died_cause;
-    
+
     const show = stateEl && stateEl.value === 'Dead';
     if (deathContainer) {
         deathContainer.classList.toggle('hidden', !show);
@@ -926,7 +945,7 @@ function createSiblingNode(data = {}, role = 'Sibling', index = null) {
             else el.removeAttribute('required');
         });
     }
-    
+
     const removeBtn = node.querySelector('.remove-sibling');
     if (removeBtn) {
         removeBtn.addEventListener('click', () => {
@@ -936,7 +955,7 @@ function createSiblingNode(data = {}, role = 'Sibling', index = null) {
             renumberRepeaters(role);
         });
     }
-    
+
     if (stateEl) {
         stateEl.addEventListener('change', (e) => {
             const show = e.target.value === 'Dead';
@@ -964,16 +983,16 @@ function createChildNode(data = {}, role = 'Child', index = null) {
     const diedYearEl = node.querySelector('.child-died-year');
     const diedCauseEl = node.querySelector('.child-died-cause');
     const deathContainer = node.querySelector('.child-death-container');
-    
+
     const header = node.querySelector('.child-header');
     if (header) header.textContent = `${role}${index ? ' ' + index : ''}`;
-    
+
     if (ageEl && typeof data.age !== 'undefined') ageEl.value = data.age;
     if (stateEl && data.state) stateEl.value = data.state;
     if (diedAgeEl && data.died_age) diedAgeEl.value = data.died_age;
     if (diedYearEl && data.died_year) diedYearEl.value = data.died_year;
     if (diedCauseEl && data.died_cause) diedCauseEl.value = data.died_cause;
-    
+
     const show = stateEl && stateEl.value === 'Dead';
     if (deathContainer) {
         deathContainer.classList.toggle('hidden', !show);
@@ -983,7 +1002,7 @@ function createChildNode(data = {}, role = 'Child', index = null) {
             else el.removeAttribute('required');
         });
     }
-    
+
     const removeBtn = node.querySelector('.remove-child');
     if (removeBtn) {
         removeBtn.addEventListener('click', () => {
@@ -994,7 +1013,7 @@ function createChildNode(data = {}, role = 'Child', index = null) {
             updateDeliveryVisibility();
         });
     }
-    
+
     if (stateEl) {
         stateEl.addEventListener('change', (e) => {
             const show = e.target.value === 'Dead';
@@ -1026,7 +1045,7 @@ function renumberRepeaters(role) {
         headerClass = 'child-header';
     }
     if (!selector) return;
-    
+
     const items = Array.from(document.querySelectorAll(selector));
     items.forEach((node, i) => {
         const header = node.querySelector('.' + headerClass);
@@ -1041,7 +1060,7 @@ function syncRepeatersFromCounts() {
     const bContainer = document.getElementById('brothers-repeater');
     const sContainer = document.getElementById('sisters-repeater');
     const cContainer = document.getElementById('children-repeater');
-    
+
     if (bContainer) {
         while (bContainer.children.length < bCount) {
             const idx = bContainer.children.length + 1;
@@ -1053,7 +1072,7 @@ function syncRepeatersFromCounts() {
         }
         renumberRepeaters('Brother');
     }
-    
+
     if (sContainer) {
         while (sContainer.children.length < sCount) {
             const idx = sContainer.children.length + 1;
@@ -1065,7 +1084,7 @@ function syncRepeatersFromCounts() {
         }
         renumberRepeaters('Sister');
     }
-    
+
     if (cContainer) {
         while (cContainer.children.length < cCount) {
             const idx = cContainer.children.length + 1;
@@ -1082,25 +1101,25 @@ function syncRepeatersFromCounts() {
 
 function getRepeatersData() {
     const brothers = Array.from(document.querySelectorAll('#brothers-repeater .sibling-item')).map(node => ({
-        age: (node.querySelector('.sibling-age') || {value:''}).value,
-        state: (node.querySelector('.sibling-state') || {value:''}).value,
-        died_age: (node.querySelector('.sibling-died-age') || {value:''}).value,
-        died_year: (node.querySelector('.sibling-died-year') || {value:''}).value,
-        died_cause: (node.querySelector('.sibling-died-cause') || {value:''}).value
+        age: (node.querySelector('.sibling-age') || { value: '' }).value,
+        state: (node.querySelector('.sibling-state') || { value: '' }).value,
+        died_age: (node.querySelector('.sibling-died-age') || { value: '' }).value,
+        died_year: (node.querySelector('.sibling-died-year') || { value: '' }).value,
+        died_cause: (node.querySelector('.sibling-died-cause') || { value: '' }).value
     }));
     const sisters = Array.from(document.querySelectorAll('#sisters-repeater .sibling-item')).map(node => ({
-        age: (node.querySelector('.sibling-age') || {value:''}).value,
-        state: (node.querySelector('.sibling-state') || {value:''}).value,
-        died_age: (node.querySelector('.sibling-died-age') || {value:''}).value,
-        died_year: (node.querySelector('.sibling-died-year') || {value:''}).value,
-        died_cause: (node.querySelector('.sibling-died-cause') || {value:''}).value
+        age: (node.querySelector('.sibling-age') || { value: '' }).value,
+        state: (node.querySelector('.sibling-state') || { value: '' }).value,
+        died_age: (node.querySelector('.sibling-died-age') || { value: '' }).value,
+        died_year: (node.querySelector('.sibling-died-year') || { value: '' }).value,
+        died_cause: (node.querySelector('.sibling-died-cause') || { value: '' }).value
     }));
     const children = Array.from(document.querySelectorAll('#children-repeater .child-item')).map(node => ({
-        age: (node.querySelector('.child-age') || {value:''}).value,
-        state: (node.querySelector('.child-state') || {value:''}).value,
-        died_age: (node.querySelector('.child-died-age') || {value:''}).value,
-        died_year: (node.querySelector('.child-died-year') || {value:''}).value,
-        died_cause: (node.querySelector('.child-died-cause') || {value:''}).value
+        age: (node.querySelector('.child-age') || { value: '' }).value,
+        state: (node.querySelector('.child-state') || { value: '' }).value,
+        died_age: (node.querySelector('.child-died-age') || { value: '' }).value,
+        died_year: (node.querySelector('.child-died-year') || { value: '' }).value,
+        died_cause: (node.querySelector('.child-died-cause') || { value: '' }).value
     }));
     return { brothers, sisters, children };
 }
@@ -1109,11 +1128,11 @@ function loadRepeatersFromData(data = {}) {
     const bContainer = document.getElementById('brothers-repeater');
     const sContainer = document.getElementById('sisters-repeater');
     const cContainer = document.getElementById('children-repeater');
-    
+
     if (bContainer) bContainer.innerHTML = '';
     if (sContainer) sContainer.innerHTML = '';
     if (cContainer) cContainer.innerHTML = '';
-    
+
     if (Array.isArray(data.brothers) && bContainer) {
         data.brothers.forEach((b, i) => {
             const node = createSiblingNode(b, 'Brother', i + 1);
@@ -1132,15 +1151,15 @@ function loadRepeatersFromData(data = {}) {
             if (node) cContainer.appendChild(node);
         });
     }
-    
+
     const numBrothersEl = document.getElementById('num_brothers');
     const numSistersEl = document.getElementById('num_sisters');
     const numChildrenEl = document.getElementById('num_children');
-    
+
     if (numBrothersEl) numBrothersEl.value = (data.brothers && data.brothers.length) || 0;
     if (numSistersEl) numSistersEl.value = (data.sisters && data.sisters.length) || 0;
     if (numChildrenEl) numChildrenEl.value = (data.children && data.children.length) || 0;
-    
+
     renumberRepeaters('Brother');
     renumberRepeaters('Sister');
     renumberRepeaters('Child');
@@ -1153,9 +1172,9 @@ function updateCorrAddressVisibility() {
     const corrContainer = document.getElementById('corr-address-container');
     const corrAddressInput = document.getElementById('corr_address');
     const kycAddressInput = document.getElementById('address');
-    
+
     if (!corrCheckbox) return;
-    
+
     if (corrCheckbox.checked) {
         if (corrContainer) corrContainer.classList.add('hidden');
         if (corrAddressInput && kycAddressInput) {
