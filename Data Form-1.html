@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,121 +12,618 @@
     <!-- Application Initialization - Must load after modules -->
     <script src="js/init.js"></script>
     <style>
-        /* Custom styles for a better look and feel */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* ===== MODERN DESIGN SYSTEM WITH DARK MODE ===== */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        /* CSS Custom Properties - Light Theme (Default) */
+        :root {
+            /* Primary Gradient Colors */
+            --primary-start: #6366f1;
+            --primary-end: #8b5cf6;
+            --accent: #22d3ee;
+            --accent-glow: rgba(34, 211, 238, 0.4);
+
+            /* Surface Colors */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #f1f5f9;
+            --surface: rgba(255, 255, 255, 0.85);
+            --surface-elevated: rgba(255, 255, 255, 0.95);
+            --surface-hover: rgba(255, 255, 255, 1);
+
+            /* Text Colors */
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --text-muted: #94a3b8;
+
+            /* Border & Dividers */
+            --border: rgba(148, 163, 184, 0.3);
+            --border-focus: rgba(99, 102, 241, 0.5);
+            --divider: #e2e8f0;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+            --shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -4px rgba(15, 23, 42, 0.1);
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+
+            /* Status Colors */
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+
+            /* Glassmorphism */
+            --glass-bg: rgb(255, 255, 255);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --backdrop-blur: blur(16px);
+        }
+
+        /* Dark Theme */
+        .dark {
+            --primary-start: #818cf8;
+            --primary-end: #a78bfa;
+            --accent: #22d3ee;
+            --accent-glow: rgba(34, 211, 238, 0.3);
+
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --surface: rgba(30, 41, 59, 0.8);
+            --surface-elevated: rgba(51, 65, 85, 0.9);
+            --surface-hover: rgba(51, 65, 85, 1);
+
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --text-muted: #64748b;
+
+            --border: rgba(148, 163, 184, 0.15);
+            --border-focus: rgba(129, 140, 248, 0.5);
+            --divider: #334155;
+
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 30px rgba(129, 140, 248, 0.25);
+
+            --glass-bg: rgba(30, 41, 59, 0.75);
+            --glass-border: rgba(71, 85, 105, 0.4);
+        }
+
+        /* Base Styles */
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            min-height: 100vh;
+            line-height: 1.6;
         }
+
+        /* Animated Background Gradient */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50vh;
+            background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 50%, var(--accent) 100%);
+            opacity: 0.08;
+            z-index: -1;
+            transition: opacity 0.4s ease;
+        }
+
+        .dark body::before {
+            opacity: 0.12;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 100;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: var(--backdrop-blur);
+            -webkit-backdrop-filter: var(--backdrop-blur);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .theme-toggle .sun-icon {
+            display: none;
+        }
+
+        .theme-toggle .moon-icon {
+            display: block;
+        }
+
+        .dark .theme-toggle .sun-icon {
+            display: block;
+        }
+
+        .dark .theme-toggle .moon-icon {
+            display: none;
+        }
+
+        /* Form Sections - Glassmorphism */
         .form-section {
-            background-color: white;
+            background: var(--glass-bg);
+            backdrop-filter: var(--backdrop-blur);
+            -webkit-backdrop-filter: var(--backdrop-blur);
             padding: 2rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border-radius: 1.25rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            animation: slideUp 0.5s ease-out;
         }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-section:hover {
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+
         .form-section h2 {
             font-size: 1.5rem;
-            font-weight: 2000;
-            border-bottom: 1px solid #e5e7eb;
+            font-weight: 700;
+            border-bottom: 1px solid var(--divider);
             padding-bottom: 1rem;
             margin-bottom: 1.5rem;
-            color: #111827;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
+
+        /* Labels */
         label {
             font-weight: 500;
-            color: #374151;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            letter-spacing: 0.01em;
+            transition: color 0.3s ease;
         }
+
         .required-asterisk {
-            color: #ef4444;
+            color: var(--error);
             margin-left: 0.25em;
             font-size: 1em;
             font-weight: bold;
         }
+
+        /* Input Fields - Modern Styling */
         .dropdown-padding {
             padding: 0.75rem 1rem;
         }
-        input[type="text"], input[type="email"], input[type="date"], input[type="number"], input[type="tel"], select {
-            border-radius: 0.5rem;
-            border: 1px solid #d1d5db;
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        input[type="number"],
+        input[type="tel"],
+        select {
+            border-radius: 0.75rem;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-primary);
             padding: 0.75rem 1rem;
             width: 100%;
-            transition: border-color 0.2s, box-shadow 0.2s;
             height: 3.2rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
         }
-        input:focus, select:focus {
+
+        input::placeholder {
+            color: var(--text-muted);
+        }
+
+        input:hover,
+        select:hover {
+            border-color: var(--text-muted);
+        }
+
+        input:focus,
+        select:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            border-color: var(--primary-start);
+            background: var(--surface-hover);
+            box-shadow: 0 0 0 4px var(--border-focus), var(--shadow-sm);
         }
-        .main-tab-button {
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            border-radius: 0.5rem;
+
+        /* Checkbox Styling */
+        input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: var(--primary-start);
             cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
         }
+
+        /* Main Tab Navigation - Pill Style */
+        .main-tab-button {
+            padding: 0.875rem 2rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-tab-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
         .main-tab-button.active {
-            background-color: #3b82f6 !important;
+            background: linear-gradient(135deg, var(--primary-start), var(--primary-end)) !important;
             color: white !important;
-            border: 2px solid #2563eb !important;
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
         }
+
         .main-tab-button:not(.active) {
-            background-color: #e5e7eb !important;
-            color: #374151 !important;
-            border: 2px solid transparent !important;
+            background: var(--surface) !important;
+            color: var(--text-secondary) !important;
+            border: 1px solid var(--border) !important;
         }
+
+        .main-tab-button:not(.active):hover {
+            background: var(--surface-hover) !important;
+            color: var(--text-primary) !important;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Form Tab Navigation */
         .form-tab-button {
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.25rem;
             font-size: 0.875rem;
+            font-weight: 500;
             white-space: nowrap;
             border-bottom: 3px solid transparent;
+            color: var(--text-tertiary);
+            transition: all 0.3s ease;
+            background: transparent;
         }
+
+        .form-tab-button:hover {
+            color: var(--text-primary);
+            background: var(--surface);
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+
         .form-tab-button.active {
-             border-color: #3b82f6;
-             color: #3b82f6;
+            border-color: var(--primary-start);
+            color: var(--primary-start);
+            font-weight: 600;
         }
-        /* Modal and Loader Styles */
+
+        /* Progress Bar - Gradient with Shimmer */
+        #progress-bar {
+            background: linear-gradient(90deg, var(--primary-start), var(--primary-end), var(--accent));
+            background-size: 200% 100%;
+            animation: shimmer 2s ease-in-out infinite;
+            border-radius: 9999px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Modal Styles - Glassmorphism */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 50;
+            animation: fadeIn 0.3s ease;
         }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
         .modal-content {
-            background-color: white;
+            background: var(--glass-bg);
+            backdrop-filter: var(--backdrop-blur);
+            -webkit-backdrop-filter: var(--backdrop-blur);
+            border: 1px solid var(--glass-border);
             padding: 2rem;
-            border-radius: 0.75rem;
+            border-radius: 1.5rem;
             width: 95%;
-            max-width: 1000px; /* wider for details view */
+            max-width: 1000px;
             max-height: 93vh;
             overflow-y: auto;
+            box-shadow: var(--shadow-lg), 0 0 40px rgba(99, 102, 241, 0.15);
+            animation: modalSlideIn 0.4s ease-out;
         }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Loader - Gradient Spinner */
         .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3b82f6;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary-start);
+            border-right: 4px solid var(--accent);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+            width: 48px;
+            height: 48px;
+            animation: spin 0.8s linear infinite;
         }
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
+
+        /* Error Messages */
         .error-message {
             display: block;
-            min-height: 1rem; /* Reserve space to prevent layout shift */
+            min-height: 1rem;
+            font-size: 0.75rem;
+            color: var(--error);
+        }
+
+        /* Action Buttons - Gradient */
+        button[type="submit"],
+        .bg-blue-600,
+        .bg-green-600 {
+            background: linear-gradient(135deg, var(--primary-start), var(--primary-end)) !important;
+            border: none !important;
+            color: white !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button[type="submit"]:hover,
+        .bg-blue-600:hover,
+        .bg-green-600:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4) !important;
+        }
+
+        .bg-gray-600 {
+            background: var(--surface-elevated) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border) !important;
+        }
+
+        .bg-gray-600:hover {
+            background: var(--surface-hover) !important;
+            transform: translateY(-2px);
+        }
+
+        .bg-red-600 {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+        }
+
+        .bg-purple-600 {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+        }
+
+        /* Table Styles */
+        table {
+            background: var(--surface);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        thead {
+            background: var(--surface-elevated) !important;
+        }
+
+        th {
+            color: var(--text-secondary) !important;
+            font-weight: 600;
+        }
+
+        tbody tr {
+            background: var(--surface) !important;
+            transition: all 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--surface-hover) !important;
+            transform: scale(1.01);
+        }
+
+        td {
+            color: var(--text-primary) !important;
+        }
+
+        /* Alert/Info Box */
+        .bg-yellow-100 {
+            background: rgba(245, 158, 11, 0.15) !important;
+            border-color: rgba(245, 158, 11, 0.4) !important;
+            color: var(--text-primary) !important;
+            border-radius: 1rem;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-tertiary);
+        }
+
+        /* Typography Enhancements */
+        h1 {
+            font-weight: 800;
+            letter-spacing: -0.025em;
+        }
+
+        h2,
+        h3 {
+            font-weight: 700;
+            letter-spacing: -0.015em;
+        }
+
+        /* Card/Section Backgrounds */
+        .bg-white {
+            background: var(--surface) !important;
+        }
+
+        .bg-gray-50 {
+            background: var(--surface-elevated) !important;
+        }
+
+        .bg-gray-100 {
+            background: var(--bg-secondary) !important;
+        }
+
+        /* Text Color Overrides */
+        .text-gray-800 {
+            color: var(--text-primary) !important;
+        }
+
+        .text-gray-700 {
+            color: var(--text-secondary) !important;
+        }
+
+        .text-gray-600 {
+            color: var(--text-tertiary) !important;
+        }
+
+        .text-gray-500 {
+            color: var(--text-muted) !important;
+        }
+
+        /* Border Color Overrides */
+        .border-gray-200,
+        .border-gray-300 {
+            border-color: var(--border) !important;
+        }
+
+        .divide-gray-200>*+* {
+            border-color: var(--divider) !important;
+        }
+
+        /* Selection Color */
+        ::selection {
+            background: var(--primary-start);
+            color: white;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 640px) {
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+
+            .form-section {
+                padding: 1.25rem;
+                border-radius: 1rem;
+            }
+
+            .main-tab-button {
+                padding: 0.625rem 1.25rem;
+                font-size: 0.875rem;
+            }
         }
     </style>
 </head>
+
 <body class="bg-gray-100 p-4 sm:p-6 md:p-8">
+
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+        <span class="sun-icon">☀️</span>
+        <span class="moon-icon">🌙</span>
+    </button>
 
     <div class="max-w-7xl mx-auto">
         <!-- Form View -->
@@ -133,18 +631,24 @@
             <div class="max-w-4xl mx-auto">
                 <!-- Header container with relative positioning -->
                 <div class="relative flex justify-center items-center mb-8">
-                    <div class="absolute left-0"><img src="data:image/png;base64, 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" alt="Company Logo" class="h-16"></div>
-                    <h1 class="text-3xl font-bold text-gray-800">Data Sheet</h1>
+                    <div class="absolute left-0"><img
+                            src="data:image/png;base64, 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"
+                            alt="Company Logo" class="h-16"></div>
+                    <h1 class="text-3xl font-bold"
+                        style="background: linear-gradient(135deg, var(--primary-start), var(--primary-end), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        Data Sheet</h1>
                     <div class="absolute right-0 text-right">
                         <h2 class="text-xl font-bold text-gray-800">Rapolu Venkateshwarlu</h2>
                         <p class="text-sm text-gray-600">Insurance Advisor</p>
                     </div>
                 </div>
 
-                    <!-- Main Tab Navigation -->
+                <!-- Main Tab Navigation -->
                 <div class="flex justify-center space-x-4 mb-8">
-                    <button id="form-tab-button" class="main-tab-button active" onclick="showMainTab('form-view')">Data Entry Form</button>
-                    <button id="view-tab-button" class="main-tab-button" onclick="showMainTab('data-view')">View Submitted Data</button>
+                    <button id="form-tab-button" class="main-tab-button active" onclick="showMainTab('form-view')">Data
+                        Entry Form</button>
+                    <button id="view-tab-button" class="main-tab-button" onclick="showMainTab('data-view')">View
+                        Submitted Data</button>
                 </div>
 
                 <!-- Progress Indicator -->
@@ -154,7 +658,8 @@
                         <span id="progress-text">1 of 7</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 14.29%"></div>
+                        <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style="width: 14.29%"></div>
                     </div>
                 </div>
 
@@ -167,14 +672,26 @@
                     <div class="form-section form-tab-panel" data-tab-name="Applicant">
                         <h2>Applicant Details</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div><label for="name_of_la">Name of Life Assured <span class="required-asterisk">*</span></label><input type="text" id="name_of_la" name="name_of_la" class="mt-1" required><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="proposer">Proposer Name</label><input type="text" id="proposer" name="proposer" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="aadhaar">Aadhaar <span class="required-asterisk">*</span></label><input type="text" id="aadhaar" name="aadhaar" class="mt-1" required><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="ckyc">CKYC</label><input type="text" id="ckyc" name="ckyc" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="abha">ABHA</label><input type="text" id="abha" name="abha" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="pan">PAN</label><input type="text" id="pan" name="pan" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="f_name">Father's Name</label><input type="text" id="f_name" name="f_name" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="m_name">Mother's Name</label><input type="text" id="m_name" name="m_name" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="name_of_la">Name of Life Assured <span
+                                        class="required-asterisk">*</span></label><input type="text" id="name_of_la"
+                                    name="name_of_la" class="mt-1" required><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="proposer">Proposer Name</label><input type="text" id="proposer"
+                                    name="proposer" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="aadhaar">Aadhaar <span class="required-asterisk">*</span></label><input
+                                    type="text" id="aadhaar" name="aadhaar" class="mt-1" required><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="ckyc">CKYC</label><input type="text" id="ckyc" name="ckyc"
+                                    class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="abha">ABHA</label><input type="text" id="abha" name="abha"
+                                    class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="pan">PAN</label><input type="text" id="pan" name="pan" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="f_name">Father's Name</label><input type="text" id="f_name" name="f_name"
+                                    class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="m_name">Mother's Name</label><input type="text" id="m_name" name="m_name"
+                                    class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div>
                                 <label for="gender">Gender <span class="required-asterisk">*</span></label>
                                 <select id="gender" name="gender" class="mt-1 dropdown-padding" required>
@@ -187,34 +704,59 @@
                             </div>
                             <div>
                                 <label for="is_married">Is Married <span class="required-asterisk">*</span></label>
-                                <select id="is_married" name="is_married" class="mt-1 dropdown-padding" aria-label="Is Married" required>
+                                <select id="is_married" name="is_married" class="mt-1 dropdown-padding"
+                                    aria-label="Is Married" required>
                                     <option value="">Select</option>
                                     <option value="Yes">Yes</option>
                                     <option value="No">No</option>
                                 </select>
                                 <span class="error-message text-red-500 text-sm mt-1"></span>
                             </div>
-                            <div class="marriage-dependent hidden"><label for="spouse">Spouse's Name <span class="required-asterisk">*</span></label><input type="text" id="spouse" name="spouse" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div class="marriage-dependent hidden"><label for="d_marriage">Date of Marriage <span class="required-asterisk">*</span></label><input type="date" id="d_marriage" name="d_marriage" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            
+                            <div class="marriage-dependent hidden"><label for="spouse">Spouse's Name <span
+                                        class="required-asterisk">*</span></label><input type="text" id="spouse"
+                                    name="spouse" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div class="marriage-dependent hidden"><label for="d_marriage">Date of Marriage <span
+                                        class="required-asterisk">*</span></label><input type="date" id="d_marriage"
+                                    name="d_marriage" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+
                         </div>
-                        <div class="flex justify-end mt-6"><button type="button" onclick="navigateFormTab(1)" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next &rarr;</button></div>
+                        <div class="flex justify-end mt-6"><button type="button" onclick="navigateFormTab(1)"
+                                class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next
+                                &rarr;</button></div>
                     </div>
-                    
+
                     <!-- Contact Details -->
                     <div class="form-section form-tab-panel hidden" data-tab-name="Contact">
                         <h2>Contact & Personal Details</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div><label for="mobile_adhar">Mobile (Aadhaar) <span class="required-asterisk">*</span></label><input type="tel" id="mobile_adhar" name="mobile_adhar" class="mt-1" pattern="\d{10}" title="Please enter a 10-digit mobile number" required><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="mobile">Mobile </label><input type="tel" id="mobile" name="mobile" class="mt-1" pattern="\d{10}" title="Please enter a 10-digit mobile number"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="email">E-mail </label><input type="email" id="email" name="email" class="mt-1" ><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="whatsapp">Whatsapp</label><input type="tel" id="whatsapp" name="whatsapp" class="mt-1" pattern="\d{10}"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="dob">DOB <span class="required-asterisk">*</span></label><input type="date" id="dob" name="dob" class="mt-1" required><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="birth_place">Birth Place</label><input type="text" id="birth_place" name="birth_place" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="near_lb_age">Age</label><input type="text" id="near_lb_age" name="near_lb_age" class="mt-1" readonly placeholder="Calculated from DOB"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="mobile_adhar">Mobile (Aadhaar) <span
+                                        class="required-asterisk">*</span></label><input type="tel" id="mobile_adhar"
+                                    name="mobile_adhar" class="mt-1" pattern="\d{10}"
+                                    title="Please enter a 10-digit mobile number" required><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="mobile">Mobile </label><input type="tel" id="mobile" name="mobile"
+                                    class="mt-1" pattern="\d{10}" title="Please enter a 10-digit mobile number"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="email">E-mail </label><input type="email" id="email" name="email"
+                                    class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="whatsapp">Whatsapp</label><input type="tel" id="whatsapp" name="whatsapp"
+                                    class="mt-1" pattern="\d{10}"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="dob">DOB <span class="required-asterisk">*</span></label><input type="date"
+                                    id="dob" name="dob" class="mt-1" required><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="birth_place">Birth Place</label><input type="text" id="birth_place"
+                                    name="birth_place" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="near_lb_age">Age</label><input type="text" id="near_lb_age"
+                                    name="near_lb_age" class="mt-1" readonly placeholder="Calculated from DOB"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div>
                                 <label for="residential_status">Residential Status</label>
-                                <select id="residential_status" name="residential_status" class="mt-1 dropdown-padding" style="height: 3rem;">
+                                <select id="residential_status" name="residential_status" class="mt-1 dropdown-padding"
+                                    style="height: 3rem;">
                                     <option value="">Select</option>
                                     <option value="Resident Indian">Resident Indian</option>
                                     <option value="NRI">NRI</option>
@@ -222,48 +764,90 @@
                                 </select>
                                 <span class="error-message text-red-500 text-sm mt-1"></span>
                             </div>
-                                                    <div class="md:col-span-2 hidden" id="corr-address-container"><label for="corr_address">Correspondence Address</label><input type="text" id="corr_address" name="corr_address" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                                <div class="md:col-span-2"><label for="address">Address as per KYC</label><input type="text" id="address" name="address" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                                                    <div class="md:col-span-2 flex items-center space-x-3">
-                                                        <input type="checkbox" id="corr_same_kyc" name="corr_same_kyc" class="mt-1">
-                                                        <label for="corr_same_kyc" class="mb-0">Is the correspondence address same as KYC?</label>
-                                                    </div>
+                            <div class="md:col-span-2 hidden" id="corr-address-container"><label
+                                    for="corr_address">Correspondence Address</label><input type="text"
+                                    id="corr_address" name="corr_address" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div class="md:col-span-2"><label for="address">Address as per KYC</label><input type="text"
+                                    id="address" name="address" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div class="md:col-span-2 flex items-center space-x-3">
+                                <input type="checkbox" id="corr_same_kyc" name="corr_same_kyc" class="mt-1">
+                                <label for="corr_same_kyc" class="mb-0">Is the correspondence address same as
+                                    KYC?</label>
+                            </div>
                         </div>
-                        <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr; Previous</button><button type="button" onclick="navigateFormTab(1)" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next &rarr;</button></div>
+                        <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)"
+                                class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr;
+                                Previous</button><button type="button" onclick="navigateFormTab(1)"
+                                class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next
+                                &rarr;</button></div>
                     </div>
 
                     <!-- Education & Qualification -->
                     <div class="form-section form-tab-panel hidden" data-tab-name="Education & Qualification">
                         <h2>Education & Qualification Details</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div><label for="education">Education</label><input type="text" id="education" name="education" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="current_job">Current Job</label><input type="text" id="current_job" name="current_job" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="type_of_duty">Type of Duty</label><input type="text" id="type_of_duty" name="type_of_duty" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="co_name">Company Name</label><input type="text" id="co_name" name="co_name" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="since">Since</label><input type="text" id="since" name="since" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="total_experience">Total Experience</label><input type="text" id="total_experience" name="total_experience" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="a_income">₹ Annual Income</label><input type="text" inputmode="numeric" id="a_income" name="a_income" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="ly_income1">₹ LY Income 1</label><input type="text" inputmode="numeric" id="ly_income1" name="ly_income1" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="ly_income2">₹ LY Income 2</label><input type="text" inputmode="numeric" id="ly_income2" name="ly_income2" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="ly_income3">₹ LY Income 3</label><input type="text" inputmode="numeric" id="ly_income3" name="ly_income3" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="education">Education</label><input type="text" id="education"
+                                    name="education" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="current_job">Current Job</label><input type="text" id="current_job"
+                                    name="current_job" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="type_of_duty">Type of Duty</label><input type="text" id="type_of_duty"
+                                    name="type_of_duty" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="co_name">Company Name</label><input type="text" id="co_name" name="co_name"
+                                    class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="since">Since</label><input type="text" id="since" name="since"
+                                    class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="total_experience">Total Experience</label><input type="text"
+                                    id="total_experience" name="total_experience" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="a_income">₹ Annual Income</label><input type="text" inputmode="numeric"
+                                    id="a_income" name="a_income" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="ly_income1">₹ LY Income 1</label><input type="text" inputmode="numeric"
+                                    id="ly_income1" name="ly_income1" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="ly_income2">₹ LY Income 2</label><input type="text" inputmode="numeric"
+                                    id="ly_income2" name="ly_income2" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="ly_income3">₹ LY Income 3</label><input type="text" inputmode="numeric"
+                                    id="ly_income3" name="ly_income3" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
                             <!-- Husband details: shown when Gender is Female -->
-                            <div id="husband-details-section" class="hidden md:col-span-2 lg:col-span-3 form-section bg-gray-50 p-4 rounded">
+                            <div id="husband-details-section"
+                                class="hidden md:col-span-2 lg:col-span-3 form-section bg-gray-50 p-4 rounded">
                                 <h3 class="font-semibold mb-3">Husband Details</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div><label for="husband_occupation">Occupation</label><input type="text" id="husband_occupation" name="husband_occupation" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                                    <div><label for="husband_annual_income">₹ Annual Income</label><input type="text" inputmode="numeric" id="husband_annual_income" name="husband_annual_income" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                                    <div><label for="husband_occupation">Occupation</label><input type="text"
+                                            id="husband_occupation" name="husband_occupation" class="mt-1"><span
+                                            class="error-message text-red-500 text-sm mt-1"></span></div>
+                                    <div><label for="husband_annual_income">₹ Annual Income</label><input type="text"
+                                            inputmode="numeric" id="husband_annual_income" name="husband_annual_income"
+                                            class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr; Previous</button><button type="button" onclick="navigateFormTab(1)" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next &rarr;</button></div>
+                        <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)"
+                                class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr;
+                                Previous</button><button type="button" onclick="navigateFormTab(1)"
+                                class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next
+                                &rarr;</button></div>
                     </div>
 
                     <!-- Plan Details -->
                     <div class="form-section form-tab-panel hidden" data-tab-name="Proposed Plan">
                         <h2>Proposed Plan</h2>
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                            <div><label for="plan_term">PLAN / Term <span class="required-asterisk">*</span></label><input type="text" id="plan_term" name="plan_term" class="mt-1" required><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="ppt">PPT</label><input type="text" id="ppt" name="ppt" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="plan_term">PLAN / Term <span
+                                        class="required-asterisk">*</span></label><input type="text" id="plan_term"
+                                    name="plan_term" class="mt-1" required><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="ppt">PPT</label><input type="text" id="ppt" name="ppt" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div>
                                 <label for="mode">Mode</label>
                                 <select id="mode" name="mode" class="mt-1 dropdown-padding" style="height: 3rem;">
@@ -276,7 +860,9 @@
                                 </select>
                                 <span class="error-message text-red-500 text-sm mt-1"></span>
                             </div>
-                            <div><label for="sum_assured">Sum Assured</label><input type="number" id="sum_assured" min="0" name="sum_assured" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="sum_assured">Sum Assured</label><input type="number" id="sum_assured"
+                                    min="0" name="sum_assured" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div>
                                 <label for="ab_addb">Accidental Benefit</label>
                                 <select id="ab_addb" name="ab_addb" class="mt-1 dropdown-padding" style="height: 3rem;">
@@ -288,17 +874,21 @@
                             </div>
                             <div>
                                 <label for="term_rider">Term Rider</label>
-                                <select id="term_rider" name="term_rider" class="mt-1 dropdown-padding" style="height: 3rem;">
+                                <select id="term_rider" name="term_rider" class="mt-1 dropdown-padding"
+                                    style="height: 3rem;">
                                     <option value="">Select</option>
                                     <option value="Yes">Yes</option>
                                     <option value="No">No</option>
                                 </select>
                                 <span class="error-message text-red-500 text-sm mt-1"></span>
                             </div>
-                            <div><label for="premium">Premium <span class="required-asterisk">*</span></label><input type="number" id="premium" min="0" name="premium" class="mt-1" required><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="premium">Premium <span class="required-asterisk">*</span></label><input
+                                    type="number" id="premium" min="0" name="premium" class="mt-1" required><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div>
                                 <label for="dating_back">Dating Back</label>
-                                <select id="dating_back" name="dating_back" class="mt-1 dropdown-padding" style="height: 3rem;">
+                                <select id="dating_back" name="dating_back" class="mt-1 dropdown-padding"
+                                    style="height: 3rem;">
                                     <option value="">Select</option>
                                     <option value="Yes">Yes</option>
                                     <option value="No">No</option>
@@ -319,15 +909,27 @@
                                 </select>
                                 <span class="error-message text-red-500 text-sm mt-1"></span>
                             </div>
-                            <div><label for="boc_number">BOC Number</label><input type="text" id="boc_number" name="boc_number" class="mt-1" placeholder="Enter BOC number"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="boc_date">BOC Date</label><input type="date" id="boc_date" name="boc_date" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="boc_amt">BOC Amt</label><input type="number" id="boc_amt" min="0" name="boc_amt" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="doc">DOC</label><input type="date" id="doc" name="doc" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="policy_no">Policy No</label><input type="text" id="policy_no" name="policy_no" class="mt-1" placeholder="Enter Policy number"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="boc_number">BOC Number</label><input type="text" id="boc_number"
+                                    name="boc_number" class="mt-1" placeholder="Enter BOC number"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="boc_date">BOC Date</label><input type="date" id="boc_date" name="boc_date"
+                                    class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="boc_amt">BOC Amt</label><input type="number" id="boc_amt" min="0"
+                                    name="boc_amt" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="doc">DOC</label><input type="date" id="doc" name="doc" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="policy_no">Policy No</label><input type="text" id="policy_no"
+                                    name="policy_no" class="mt-1" placeholder="Enter Policy number"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
                         </div>
-                         <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr; Previous</button><button type="button" onclick="navigateFormTab(1)" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next &rarr;</button></div>
+                        <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)"
+                                class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr;
+                                Previous</button><button type="button" onclick="navigateFormTab(1)"
+                                class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next
+                                &rarr;</button></div>
                     </div>
-                    
+
                     <!-- Nominee Details -->
                     <div class="form-section form-tab-panel hidden" data-tab-name="Nominee">
                         <h2>Nominee & Appointee Details</h2>
@@ -337,46 +939,86 @@
                                 <!-- nominee items injected here -->
                             </div>
                             <template id="nominee-template">
-                                <div class="nominee-item relative grid grid-cols-1 md:grid-cols-6 gap-3 p-3 rounded border border-gray-200 bg-white items-end">
-                                    <button type="button" class="remove-nominee absolute top-2 right-2 text-gray-500 hover:text-gray-800 bg-transparent p-1 rounded" aria-label="Remove nominee">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                <div
+                                    class="nominee-item relative grid grid-cols-1 md:grid-cols-6 gap-3 p-3 rounded border border-gray-200 bg-white items-end">
+                                    <button type="button"
+                                        class="remove-nominee absolute top-2 right-2 text-gray-500 hover:text-gray-800 bg-transparent p-1 rounded"
+                                        aria-label="Remove nominee">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
                                     </button>
-                                    <div class="md:col-span-2"><label class="text-xs text-gray-600">Name</label><input type="text" name="nominee_name" class="mt-1 nominee-name"></div>
-                                    <div><label class="text-xs text-gray-600">Share %</label><input type="number" min="0" max="100" step="0.01" name="nominee_share" class="mt-1 nominee-share"></div>
-                                    <div><label class="text-xs text-gray-600">Date of Birth</label><input type="date" name="nominee_dob" class="mt-1 nominee-dob"></div>
-                                    <div><label class="text-xs text-gray-600">Relation</label><input type="text" name="nominee_relation" class="mt-1 nominee-relation"></div>
-                                    <div><label class="text-xs text-gray-600">Aadhaar</label><input type="text" name="nominee_aadhaar" class="mt-1 nominee-aadhaar"></div>
+                                    <div class="md:col-span-2"><label class="text-xs text-gray-600">Name</label><input
+                                            type="text" name="nominee_name" class="mt-1 nominee-name"></div>
+                                    <div><label class="text-xs text-gray-600">Share %</label><input type="number"
+                                            min="0" max="100" step="0.01" name="nominee_share"
+                                            class="mt-1 nominee-share"></div>
+                                    <div><label class="text-xs text-gray-600">Date of Birth</label><input type="date"
+                                            name="nominee_dob" class="mt-1 nominee-dob"></div>
+                                    <div><label class="text-xs text-gray-600">Relation</label><input type="text"
+                                            name="nominee_relation" class="mt-1 nominee-relation"></div>
+                                    <div><label class="text-xs text-gray-600">Aadhaar</label><input type="text"
+                                            name="nominee_aadhaar" class="mt-1 nominee-aadhaar"></div>
                                 </div>
                             </template>
                             <div class="mt-3">
-                                <button type="button" id="add-nominee" class="bg-blue-600 text-white font-bold py-2 px-4 rounded">Add Nominee</button>
+                                <button type="button" id="add-nominee"
+                                    class="bg-blue-600 text-white font-bold py-2 px-4 rounded">Add Nominee</button>
                             </div>
                             <div id="nominee-error" class="text-sm text-red-600 mt-2"></div>
                         </div>
                         <hr class="my-6 border-gray-200">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div><label for="appointee">Appointee</label><input type="text" id="appointee" name="appointee" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="appointee_relation">Relation</label><input type="text" id="appointee_relation" name="appointee_relation" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="appointee_age">Age</label><input type="number" id="appointee_age" name="appointee_age" min="0" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="appointee">Appointee</label><input type="text" id="appointee"
+                                    name="appointee" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="appointee_relation">Relation</label><input type="text"
+                                    id="appointee_relation" name="appointee_relation" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="appointee_age">Age</label><input type="number" id="appointee_age"
+                                    name="appointee_age" min="0" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
                         </div>
-                        <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr; Previous</button><button type="button" onclick="navigateFormTab(1)" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next &rarr;</button></div>
+                        <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)"
+                                class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr;
+                                Previous</button><button type="button" onclick="navigateFormTab(1)"
+                                class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next
+                                &rarr;</button></div>
                     </div>
 
                     <!-- Bank Details -->
                     <div class="form-section form-tab-panel hidden" data-tab-name="Bank">
                         <h2>Bank Details</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div><label for="bank_name">Bank Name</label><input type="text" id="bank_name" name="bank_name" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="ac_type">A/c Type</label><input type="text" id="ac_type" name="ac_type" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div class="md:col-span-2"><label for="ac_holder_name">A/c Holder's Name</label><input type="text" id="ac_holder_name" name="ac_holder_name" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div class="md:col-span-2"><label for="bank_address">Address</label><input type="text" id="bank_address" name="bank_address" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="ac_no">A/C No.</label><input type="text" id="ac_no" name="ac_no" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="micr_code">MICR Code</label><input type="text" id="micr_code" name="micr_code" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="ifsc_code">IFSC Code</label><input type="text" id="ifsc_code" name="ifsc_code" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="bank_name">Bank Name</label><input type="text" id="bank_name"
+                                    name="bank_name" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="ac_type">A/c Type</label><input type="text" id="ac_type" name="ac_type"
+                                    class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div class="md:col-span-2"><label for="ac_holder_name">A/c Holder's Name</label><input
+                                    type="text" id="ac_holder_name" name="ac_holder_name" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div class="md:col-span-2"><label for="bank_address">Address</label><input type="text"
+                                    id="bank_address" name="bank_address" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="ac_no">A/C No.</label><input type="text" id="ac_no" name="ac_no"
+                                    class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="micr_code">MICR Code</label><input type="text" id="micr_code"
+                                    name="micr_code" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div><label for="ifsc_code">IFSC Code</label><input type="text" id="ifsc_code"
+                                    name="ifsc_code" class="mt-1"><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
                         </div>
-                        <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr; Previous</button><button type="button" onclick="navigateFormTab(1)" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next &rarr;</button></div>
+                        <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)"
+                                class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr;
+                                Previous</button><button type="button" onclick="navigateFormTab(1)"
+                                class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next
+                                &rarr;</button></div>
                     </div>
-                    
+
                     <!-- Medical Details -->
                     <div class="form-section form-tab-panel hidden" data-tab-name="Medical History">
                         <h2>Family & Medical Details</h2>
@@ -384,10 +1026,13 @@
                             <div>
                                 <h3 class="font-semibold text-lg mb-2">Father's Details</h3>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <div><label for="fam_father_age">Age</label><input type="number" id="fam_father_age" min="0" name="fam_father_age" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                                    <div><label for="fam_father_age">Age</label><input type="number" id="fam_father_age"
+                                            min="0" name="fam_father_age" class="mt-1"><span
+                                            class="error-message text-red-500 text-sm mt-1"></span></div>
                                     <div>
                                         <label for="fam_father_state">State of Health</label>
-                                        <select id="fam_father_state" name="fam_father_state" class="mt-1 dropdown-padding" style="height:3rem;">
+                                        <select id="fam_father_state" name="fam_father_state"
+                                            class="mt-1 dropdown-padding" style="height:3rem;">
                                             <option value="">Select</option>
                                             <option value="Good">Good</option>
                                             <option value="Dead">Dead</option>
@@ -396,9 +1041,18 @@
                                     </div>
                                     <div id="father-death-container" class="md:col-span-2 hidden">
                                         <div class="grid grid-cols-3 gap-4">
-                                            <div><label for="fam_father_died_age">Age at Death</label><input type="number" min="0" id="fam_father_died_age" name="fam_father_died_age" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                                            <div><label for="fam_father_died_year">Death Year</label><input type="number" min="0" id="fam_father_died_year" name="fam_father_died_year" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                                            <div><label for="fam_father_died_cause">Cause of Death</label><input type="text" id="fam_father_died_cause" name="fam_father_died_cause" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                                            <div><label for="fam_father_died_age">Age at Death</label><input
+                                                    type="number" min="0" id="fam_father_died_age"
+                                                    name="fam_father_died_age" class="mt-1"><span
+                                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                                            <div><label for="fam_father_died_year">Death Year</label><input
+                                                    type="number" min="0" id="fam_father_died_year"
+                                                    name="fam_father_died_year" class="mt-1"><span
+                                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                                            <div><label for="fam_father_died_cause">Cause of Death</label><input
+                                                    type="text" id="fam_father_died_cause" name="fam_father_died_cause"
+                                                    class="mt-1"><span
+                                                    class="error-message text-red-500 text-sm mt-1"></span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -406,10 +1060,13 @@
                             <div>
                                 <h3 class="font-semibold text-lg mb-2">Mother's Details</h3>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <div><label for="fam_mother_age">Age</label><input type="number" id="fam_mother_age" min="0" name="fam_mother_age" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                                    <div><label for="fam_mother_age">Age</label><input type="number" id="fam_mother_age"
+                                            min="0" name="fam_mother_age" class="mt-1"><span
+                                            class="error-message text-red-500 text-sm mt-1"></span></div>
                                     <div>
                                         <label for="fam_mother_state">State of Health</label>
-                                        <select id="fam_mother_state" name="fam_mother_state" class="mt-1 dropdown-padding" style="height:3rem;">
+                                        <select id="fam_mother_state" name="fam_mother_state"
+                                            class="mt-1 dropdown-padding" style="height:3rem;">
                                             <option value="">Select</option>
                                             <option value="Good">Good</option>
                                             <option value="Dead">Dead</option>
@@ -418,9 +1075,18 @@
                                     </div>
                                     <div id="mother-death-container" class="md:col-span-2 hidden">
                                         <div class="grid grid-cols-3 gap-4">
-                                            <div><label for="fam_mother_died_age">Age at Death</label><input type="number" min="0" id="fam_mother_died_age" name="fam_mother_died_age" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                                            <div><label for="fam_mother_died_year">Death Year</label><input type="number" min="0" id="fam_mother_died_year" name="fam_mother_died_year" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                                            <div><label for="fam_mother_died_cause">Cause of Death</label><input type="text" id="fam_mother_died_cause" name="fam_mother_died_cause" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                                            <div><label for="fam_mother_died_age">Age at Death</label><input
+                                                    type="number" min="0" id="fam_mother_died_age"
+                                                    name="fam_mother_died_age" class="mt-1"><span
+                                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                                            <div><label for="fam_mother_died_year">Death Year</label><input
+                                                    type="number" min="0" id="fam_mother_died_year"
+                                                    name="fam_mother_died_year" class="mt-1"><span
+                                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                                            <div><label for="fam_mother_died_cause">Cause of Death</label><input
+                                                    type="text" id="fam_mother_died_cause" name="fam_mother_died_cause"
+                                                    class="mt-1"><span
+                                                    class="error-message text-red-500 text-sm mt-1"></span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -430,10 +1096,13 @@
                             <div>
                                 <h3 class="font-semibold text-lg mb-2">Spouse Details</h3>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <div><label for="fam_spouse_age">Age</label><input type="number" id="fam_spouse_age" min="0" name="fam_spouse_age" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                                    <div><label for="fam_spouse_age">Age</label><input type="number" id="fam_spouse_age"
+                                            min="0" name="fam_spouse_age" class="mt-1"><span
+                                            class="error-message text-red-500 text-sm mt-1"></span></div>
                                     <div>
                                         <label for="fam_spouse_state">State of Health</label>
-                                        <select id="fam_spouse_state" name="fam_spouse_state" class="mt-1 dropdown-padding" style="height:3rem;">
+                                        <select id="fam_spouse_state" name="fam_spouse_state"
+                                            class="mt-1 dropdown-padding" style="height:3rem;">
                                             <option value="">Select</option>
                                             <option value="Good">Good</option>
                                             <option value="Dead">Dead</option>
@@ -442,9 +1111,18 @@
                                     </div>
                                     <div id="spouse-death-container" class="md:col-span-2 hidden">
                                         <div class="grid grid-cols-3 gap-4">
-                                            <div><label for="fam_spouse_died_age">Age at Death</label><input type="number" min="0" id="fam_spouse_died_age" name="fam_spouse_died_age" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                                            <div><label for="fam_spouse_died_year">Death Year</label><input type="number" min="0" id="fam_spouse_died_year" name="fam_spouse_died_year" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                                            <div><label for="fam_spouse_died_cause">Cause of Death</label><input type="text" id="fam_spouse_died_cause" name="fam_spouse_died_cause" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                                            <div><label for="fam_spouse_died_age">Age at Death</label><input
+                                                    type="number" min="0" id="fam_spouse_died_age"
+                                                    name="fam_spouse_died_age" class="mt-1"><span
+                                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                                            <div><label for="fam_spouse_died_year">Death Year</label><input
+                                                    type="number" min="0" id="fam_spouse_died_year"
+                                                    name="fam_spouse_died_year" class="mt-1"><span
+                                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                                            <div><label for="fam_spouse_died_cause">Cause of Death</label><input
+                                                    type="text" id="fam_spouse_died_cause" name="fam_spouse_died_cause"
+                                                    class="mt-1"><span
+                                                    class="error-message text-red-500 text-sm mt-1"></span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -454,15 +1132,18 @@
                                 <div class="grid grid-cols-3 gap-4">
                                     <div>
                                         <label for="num_brothers">Number of Brothers</label>
-                                        <input type="number" id="num_brothers" name="num_brothers" min="0" class="mt-1" value="0">
+                                        <input type="number" id="num_brothers" name="num_brothers" min="0" class="mt-1"
+                                            value="0">
                                     </div>
                                     <div>
                                         <label for="num_sisters">Number of Sisters</label>
-                                        <input type="number" id="num_sisters" name="num_sisters" min="0" class="mt-1" value="0">
+                                        <input type="number" id="num_sisters" name="num_sisters" min="0" class="mt-1"
+                                            value="0">
                                     </div>
                                     <div>
                                         <label for="num_children">Number of Children</label>
-                                        <input type="number" id="num_children" name="num_children" min="0" class="mt-1" value="0">
+                                        <input type="number" id="num_children" name="num_children" min="0" class="mt-1"
+                                            value="0">
                                     </div>
                                 </div>
 
@@ -473,12 +1154,19 @@
                             <div class="md:col-span-2 mt-4">
                                 <h3 class="font-semibold text-lg mb-2">Medical Details</h3>
                                 <div class="grid grid-cols-3 gap-4">
-                                    <div><label for="height">Height (Cm)</label><input type="number" id="height" min="0" name="height" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                                    <div><label for="weight">Weight (Kg)</label><input type="number" id="weight" min="0" name="weight" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                                    <div><label for="abd">Abd (Cm)</label><input type="number" id="abd" min="0" name="abd" class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
+                                    <div><label for="height">Height (Cm)</label><input type="number" id="height" min="0"
+                                            name="height" class="mt-1"><span
+                                            class="error-message text-red-500 text-sm mt-1"></span></div>
+                                    <div><label for="weight">Weight (Kg)</label><input type="number" id="weight" min="0"
+                                            name="weight" class="mt-1"><span
+                                            class="error-message text-red-500 text-sm mt-1"></span></div>
+                                    <div><label for="abd">Abd (Cm)</label><input type="number" id="abd" min="0"
+                                            name="abd" class="mt-1"><span
+                                            class="error-message text-red-500 text-sm mt-1"></span></div>
                                     <div>
                                         <label for="any_operations">Any Operations?</label>
-                                        <select id="any_operations" name="any_operations" class="mt-1 dropdown-padding" style="height:3rem;">
+                                        <select id="any_operations" name="any_operations" class="mt-1 dropdown-padding"
+                                            style="height:3rem;">
                                             <option value="">Select</option>
                                             <option value="Yes">Yes</option>
                                             <option value="No">No</option>
@@ -492,7 +1180,8 @@
                                     </div>
                                     <div>
                                         <label for="any_diseases">Any Diseases?</label>
-                                        <select id="any_diseases" name="any_diseases" class="mt-1 dropdown-padding" style="height:3rem;">
+                                        <select id="any_diseases" name="any_diseases" class="mt-1 dropdown-padding"
+                                            style="height:3rem;">
                                             <option value="">Select</option>
                                             <option value="Yes">Yes</option>
                                             <option value="No">No</option>
@@ -507,7 +1196,8 @@
                                     <!-- Pregnancy fields: shown only when Gender === 'Female' -->
                                     <div id="pregnancy-section" class="hidden md:col-span-1">
                                         <label for="are_pregnant">Are you pregnant?</label>
-                                        <select id="are_pregnant" name="are_pregnant" class="mt-1 dropdown-padding" style="height:3rem;">
+                                        <select id="are_pregnant" name="are_pregnant" class="mt-1 dropdown-padding"
+                                            style="height:3rem;">
                                             <option value="">Select</option>
                                             <option value="Yes">Yes</option>
                                             <option value="No">No</option>
@@ -516,34 +1206,47 @@
                                     </div>
                                     <div id="last-delivery-container" class="hidden md:col-span-1">
                                         <label for="last_delivery_date">Date of last delivery</label>
-                                        <input type="date" id="last_delivery_date" name="last_delivery_date" class="mt-1">
+                                        <input type="date" id="last_delivery_date" name="last_delivery_date"
+                                            class="mt-1">
                                         <span class="error-message text-red-500 text-sm mt-1"></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr; Previous</button><button type="button" onclick="navigateFormTab(1)" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next &rarr;</button></div>
-                    
-                        </div>
-                    
+                        <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)"
+                                class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr;
+                                Previous</button><button type="button" onclick="navigateFormTab(1)"
+                                class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next
+                                &rarr;</button></div>
+
+                    </div>
+
                     <!-- Previous Policy Details -->
                     <div class="form-section form-tab-panel hidden" data-tab-name="Previous Policy">
                         <h2>Previous Policy Details</h2>
-                        <div class="text-sm text-gray-600 mb-4">Click the "Add Previous Policy" button below to add one or more previous policies.</div>
+                        <div class="text-sm text-gray-600 mb-4">Click the "Add Previous Policy" button below to add one
+                            or more previous policies.</div>
                         <!-- Multi previous policies repeater (keeps the legacy single fields above) -->
                         <div class="mt-6 form-section bg-gray-50 p-4 rounded">
                             <div id="previous-policies-repeater" class="space-y-3">
                                 <!-- items injected here -->
                             </div>
                             <template id="previous-policy-template">
-                                <div class="previous-policy-item relative grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 p-3 rounded border border-gray-200 bg-white">
-                                    <div><label class="text-xs text-gray-600">Policy Number</label><input type="text" class="mt-1 prev-field prev-policy-no"></div>
-                                    <div><label class="text-xs text-gray-600">Branch</label><input type="text" class="mt-1 prev-field prev-branch"></div>
-                                    <div><label class="text-xs text-gray-600">Plan/Term</label><input type="text" class="mt-1 prev-field prev-plan-term"></div>
-                                    <div><label class="text-xs text-gray-600">Sum Assured</label><input type="text" class="mt-1 prev-field prev-sa"></div>
-                                    <div><label class="text-xs text-gray-600">Premium</label><input type="text" class="mt-1 prev-field prev-y-premium"></div>
+                                <div
+                                    class="previous-policy-item relative grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 p-3 rounded border border-gray-200 bg-white">
+                                    <div><label class="text-xs text-gray-600">Policy Number</label><input type="text"
+                                            class="mt-1 prev-field prev-policy-no"></div>
+                                    <div><label class="text-xs text-gray-600">Branch</label><input type="text"
+                                            class="mt-1 prev-field prev-branch"></div>
+                                    <div><label class="text-xs text-gray-600">Plan/Term</label><input type="text"
+                                            class="mt-1 prev-field prev-plan-term"></div>
+                                    <div><label class="text-xs text-gray-600">Sum Assured</label><input type="text"
+                                            class="mt-1 prev-field prev-sa"></div>
+                                    <div><label class="text-xs text-gray-600">Premium</label><input type="text"
+                                            class="mt-1 prev-field prev-y-premium"></div>
                                     <div><label class="text-xs text-gray-600">Mode</label>
-                                        <select class="mt-1 prev-field prev-mode dropdown-padding" name="prev_mode" style="height: 3.2rem;">
+                                        <select class="mt-1 prev-field prev-mode dropdown-padding" name="prev_mode"
+                                            style="height: 3.2rem;">
                                             <option value="">Select</option>
                                             <option value="Yearly">Yearly</option>
                                             <option value="Half Yearly">Half Yearly</option>
@@ -553,90 +1256,141 @@
                                         </select>
                                     </div>
                                     <div><label class="text-xs text-gray-600">Accidental Benefit</label>
-                                        <select class="mt-1 prev-field prev-ab-addb dropdown-padding" name="prev_ab_addb" style="height: 3.2rem;">
+                                        <select class="mt-1 prev-field prev-ab-addb dropdown-padding"
+                                            name="prev_ab_addb" style="height: 3.2rem;">
                                             <option value="">Select</option>
                                             <option value="AB">AB</option>
                                             <option value="ADDB">ADDB</option>
                                         </select>
                                     </div>
-                                    <div><label class="text-xs text-gray-600">Date of Commencement</label><input type="date" class="mt-1 prev-field prev-doc"></div>
+                                    <div><label class="text-xs text-gray-600">Date of Commencement</label><input
+                                            type="date" class="mt-1 prev-field prev-doc"></div>
                                     <div><label class="text-xs text-gray-600">Rate Accepted</label>
-                                        <select class="mt-1 prev-field prev-or dropdown-padding" name="prev_or" style="height: 3.2rem;">
+                                        <select class="mt-1 prev-field prev-or dropdown-padding" name="prev_or"
+                                            style="height: 3.2rem;">
                                             <option value="">Select</option>
                                             <option value="Ordinary Rate">Ordinary Rate</option>
                                             <option value="Special Rate">Special Rate</option>
                                         </select>
                                     </div>
                                     <div><label class="text-xs text-gray-600">Medical</label>
-                                        <select class="mt-1 prev-field prev-m-nm dropdown-padding" name="prev_m_nm" style="height: 3.2rem;">
+                                        <select class="mt-1 prev-field prev-m-nm dropdown-padding" name="prev_m_nm"
+                                            style="height: 3.2rem;">
                                             <option value="">Select</option>
                                             <option value="Medical">Medical</option>
                                             <option value="Non-Medical">Non-Medical</option>
                                         </select>
                                     </div>
                                     <div><label class="text-xs text-gray-600">Inforce</label>
-                                        <select class="mt-1 prev-field prev-inforce dropdown-padding" name="prev_inforce" style="height: 3.2rem;">
+                                        <select class="mt-1 prev-field prev-inforce dropdown-padding"
+                                            name="prev_inforce" style="height: 3.2rem;">
                                             <option value="">Select</option>
                                             <option value="Yes">Yes</option>
                                             <option value="No">No</option>
                                         </select>
                                     </div>
-                                    <button type="button" class="remove-previous-policy absolute top-2 right-2 text-gray-500 hover:text-gray-800 bg-transparent p-1 rounded" aria-label="Remove previous policy">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    <button type="button"
+                                        class="remove-previous-policy absolute top-2 right-2 text-gray-500 hover:text-gray-800 bg-transparent p-1 rounded"
+                                        aria-label="Remove previous policy">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
                                     </button>
                                 </div>
                             </template>
-            
-                    <!-- Templates for dynamic sibling/child entries -->
-                    <template id="sibling-template">
-                    <div class="sibling-item relative grid grid-cols-1 md:grid-cols-6 gap-3 p-3 rounded border border-gray-200 bg-white items-end">
-                        <button type="button" class="remove-sibling absolute top-2 right-2 text-gray-500 hover:text-gray-800 bg-transparent p-1 rounded" aria-label="Remove sibling">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                        <div class="md:col-span-6"><div class="text-sm font-medium sibling-header text-gray-700 mb-2">Sibling</div></div>
-                            <div><label class="text-xs text-gray-600">Age</label><input type="number" min="0" class="mt-1 sibling-age"></div>
-                            <div><label class="text-xs text-gray-600">State</label>
-                                <select class="mt-1 sibling-state dropdown-padding" style="height:3rem;"><option value="">Select</option><option value="Good">Good</option><option value="Dead">Dead</option></select>
-                            </div>
-                            <div class="sibling-death-container md:col-span-3 hidden">
-                                <div class="grid grid-cols-3 gap-2 md:gap-4 w-full">
-                                    <div><label class="text-xs text-gray-600">Age at Death</label><input type="text" class="mt-1 sibling-died-age" ></div>
-                                    <div><label class="text-xs text-gray-600">Death Year</label><input type="text" class="mt-1 sibling-died-year" ></div>
-                                    <div><label class="text-xs text-gray-600">Cause of Death</label><input type="text" class="mt-1 sibling-died-cause" ></div>
-                                </div>
-                            </div>
-                    </div>
-                    </template>
 
-                    <template id="child-template">
-                    <div class="child-item relative grid grid-cols-1 md:grid-cols-6 gap-3 p-3 rounded border border-gray-200 bg-white items-end">
-                        <button type="button" class="remove-child absolute top-2 right-2 text-gray-500 hover:text-gray-800 bg-transparent p-1 rounded" aria-label="Remove child">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                        <div class="md:col-span-6"><div class="text-sm font-medium child-header text-gray-700 mb-2">Child</div></div>
-                                    <div><label class="text-xs text-gray-600">Age</label><input type="number" min="0" class="mt-1 child-age"></div>
+                            <!-- Templates for dynamic sibling/child entries -->
+                            <template id="sibling-template">
+                                <div
+                                    class="sibling-item relative grid grid-cols-1 md:grid-cols-6 gap-3 p-3 rounded border border-gray-200 bg-white items-end">
+                                    <button type="button"
+                                        class="remove-sibling absolute top-2 right-2 text-gray-500 hover:text-gray-800 bg-transparent p-1 rounded"
+                                        aria-label="Remove sibling">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                    <div class="md:col-span-6">
+                                        <div class="text-sm font-medium sibling-header text-gray-700 mb-2">Sibling</div>
+                                    </div>
+                                    <div><label class="text-xs text-gray-600">Age</label><input type="number" min="0"
+                                            class="mt-1 sibling-age"></div>
                                     <div><label class="text-xs text-gray-600">State</label>
-                                        <select class="mt-1 child-state dropdown-padding" style="height:3rem;"><option value="">Select</option><option value="Good">Good</option><option value="Dead">Dead</option></select>
+                                        <select class="mt-1 sibling-state dropdown-padding" style="height:3rem;">
+                                            <option value="">Select</option>
+                                            <option value="Good">Good</option>
+                                            <option value="Dead">Dead</option>
+                                        </select>
+                                    </div>
+                                    <div class="sibling-death-container md:col-span-3 hidden">
+                                        <div class="grid grid-cols-3 gap-2 md:gap-4 w-full">
+                                            <div><label class="text-xs text-gray-600">Age at Death</label><input
+                                                    type="text" class="mt-1 sibling-died-age"></div>
+                                            <div><label class="text-xs text-gray-600">Death Year</label><input
+                                                    type="text" class="mt-1 sibling-died-year"></div>
+                                            <div><label class="text-xs text-gray-600">Cause of Death</label><input
+                                                    type="text" class="mt-1 sibling-died-cause"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template id="child-template">
+                                <div
+                                    class="child-item relative grid grid-cols-1 md:grid-cols-6 gap-3 p-3 rounded border border-gray-200 bg-white items-end">
+                                    <button type="button"
+                                        class="remove-child absolute top-2 right-2 text-gray-500 hover:text-gray-800 bg-transparent p-1 rounded"
+                                        aria-label="Remove child">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                    <div class="md:col-span-6">
+                                        <div class="text-sm font-medium child-header text-gray-700 mb-2">Child</div>
+                                    </div>
+                                    <div><label class="text-xs text-gray-600">Age</label><input type="number" min="0"
+                                            class="mt-1 child-age"></div>
+                                    <div><label class="text-xs text-gray-600">State</label>
+                                        <select class="mt-1 child-state dropdown-padding" style="height:3rem;">
+                                            <option value="">Select</option>
+                                            <option value="Good">Good</option>
+                                            <option value="Dead">Dead</option>
+                                        </select>
                                     </div>
                                     <div class="child-death-container md:col-span-3 hidden">
                                         <div class="grid grid-cols-3 gap-2 md:gap-4 w-full">
-                                            <div><label class="text-xs text-gray-600">Age at Death</label><input type="text" class="mt-1 child-died-age" ></div>
-                                            <div><label class="text-xs text-gray-600">Death Year</label><input type="text" class="mt-1 child-died-year" ></div>
-                                            <div><label class="text-xs text-gray-600">Cause of Death</label><input type="text" class="mt-1 child-died-cause" ></div>
+                                            <div><label class="text-xs text-gray-600">Age at Death</label><input
+                                                    type="text" class="mt-1 child-died-age"></div>
+                                            <div><label class="text-xs text-gray-600">Death Year</label><input
+                                                    type="text" class="mt-1 child-died-year"></div>
+                                            <div><label class="text-xs text-gray-600">Cause of Death</label><input
+                                                    type="text" class="mt-1 child-died-cause"></div>
                                         </div>
                                     </div>
-                        
+
                                 </div>
                             </template>
                             <div class="mt-3">
-                                <button type="button" id="add-previous-policy" class="bg-blue-600 text-white font-bold py-2 px-4 rounded">Add Previous Policy</button>
+                                <button type="button" id="add-previous-policy"
+                                    class="bg-blue-600 text-white font-bold py-2 px-4 rounded">Add Previous
+                                    Policy</button>
                             </div>
                         </div>
-                        <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr; Previous</button><button type="submit" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition duration-300 shadow-lg">Submit Data</button></div>
-                    
-                        </div>
+                        <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)"
+                                class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr;
+                                Previous</button><button type="submit"
+                                class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition duration-300 shadow-lg">Submit
+                                Data</button></div>
+
+                    </div>
                 </form>
-             </div>
+            </div>
         </div>
 
         <!-- Data View -->
@@ -644,7 +1398,9 @@
             <div class="max-w-4xl mx-auto">
                 <!-- Header container with relative positioning -->
                 <div class="relative flex justify-center items-center mb-8">
-                    <div class="absolute left-0"><img src="data:image/png;base64, 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" alt="Company Logo" class="h-16"></div>
+                    <div class="absolute left-0"><img
+                            src="data:image/png;base64, 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"
+                            alt="Company Logo" class="h-16"></div>
                     <h1 class="text-3xl font-bold text-gray-800">Data Sheet</h1>
                     <div class="absolute right-0 text-right">
                         <h2 class="text-xl font-bold text-gray-800">Rapolu Venkateshwarlu</h2>
@@ -652,117 +1408,171 @@
                     </div>
                 </div>
 
-                    <!-- Main Tab Navigation -->
+                <!-- Main Tab Navigation -->
                 <div class="flex justify-center space-x-4 mb-8">
-                    <button id="form-tab-button" class="main-tab-button" onclick="showMainTab('form-view')">Data Entry Form</button>
-                    <button id="view-tab-button" class="main-tab-button active" onclick="showMainTab('data-view')">View Submitted Data</button>
+                    <button id="form-tab-button" class="main-tab-button" onclick="showMainTab('form-view')">Data Entry
+                        Form</button>
+                    <button id="view-tab-button" class="main-tab-button active" onclick="showMainTab('data-view')">View
+                        Submitted Data</button>
                 </div>
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                 <div class="flex justify-center sm:justify-end mb-6 space-x-4">
-                    <div class="flex flex-wrap gap-4 mb-6">
-                        <button id="export-json" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300">
-                            📁 Export
-                        </button>
-                        <label for="import-json" class="bg-purple-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-purple-700 transition duration-300 cursor-pointer">
-                            📂 Import
-                        </label>
-                        <input type="file" id="import-json" accept=".json" style="display: none;">
-                        <button id="clear-data" class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition duration-300">Clear Data</button>
-                    </div>
-                </div>
-
-                <div class="mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
-                    <strong>Security Note:</strong> Data is stored locally in your browser. For production use, implement server-side storage and encryption.
-                </div>
-
-                <div class="mb-4">
-                    <input type="text" id="search-input" placeholder="Search by name or policy number..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <div id="data-table-container" class="overflow-x-auto">
-                    <!-- Table will be generated here by JavaScript -->
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Gemini AI Modal -->
-    <div id="gemini-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="flex justify-between items-center mb-4">
-                <h3 id="modal-title" class="text-xl font-bold">AI Generated Content</h3>
-                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
-            </div>
-            <div id="modal-body">
-                <div class="flex items-center justify-center h-32">
-                    <div class="loader"></div>
-                </div>
-            </div>
-            <div class="flex justify-end space-x-4 mt-6">
-                <button id="copy-button" class="bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition duration-300">Copy Text</button>
-                <button onclick="closeModal()" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Row Details Modal -->
-    <div id="row-details-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="flex justify-between items-center mb-4">
-                <h3 id="row-modal-title" class="text-xl font-bold">Policy Details</h3>
-                <button onclick="closeRowDetails()" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
-            </div>
-            <!-- Modal tabs -->
-            <div class="mb-4 border-b border-gray-200">
-                <nav class="-mb-px flex space-x-4" aria-label="Tabs">
-                    <button id="modal-tab-overview" class="py-2 px-4 text-sm font-medium text-gray-700 border-b-2 border-transparent" type="button">Overview</button>
-                    <button id="modal-tab-prevpol" class="py-2 px-4 text-sm font-medium text-gray-700 border-b-2 border-transparent" type="button">Previous Policies</button>
-                    <button id="modal-tab-nominee" class="py-2 px-4 text-sm font-medium text-gray-700 border-b-2 border-transparent" type="button">Nominees</button>
-                </nav>
-            </div>
-
-            <div id="row-modal-body" class="text-sm text-gray-700 max-h-[65vh] overflow-y-auto">
-                <!-- Overview content -->
-                <div id="row-modal-overview" class="grid gap-4 grid-cols-1 sm:grid-cols-2"></div>
-
-                <!-- Previous policies content (hidden by default) -->
-                <div id="row-modal-prevpol" class="hidden">
-                    <div class="flex items-start space-x-4">
-                        <div id="prevpol-list" class="w-1/3 border-r pr-4 space-y-2 max-h-[55vh] overflow-y-auto">
-                            <!-- policy list injected here -->
-                        </div>
-                        <div id="prevpol-detail" class="w-2/3 pl-4">
-                            <!-- selected policy details -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex justify-center sm:justify-end mb-6 space-x-4">
+                        <div class="flex flex-wrap gap-4 mb-6">
+                            <button id="export-json"
+                                class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300">
+                                📁 Export
+                            </button>
+                            <label for="import-json"
+                                class="bg-purple-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-purple-700 transition duration-300 cursor-pointer">
+                                📂 Import
+                            </label>
+                            <input type="file" id="import-json" accept=".json" style="display: none;">
+                            <button id="clear-data"
+                                class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition duration-300">Clear
+                                Data</button>
                         </div>
                     </div>
-                </div>
 
-                <!-- Nominees content (hidden by default) - converted to a selectable list + detail pane -->
-                <div id="row-modal-nominee" class="hidden">
-                    <!-- Appointee container placed above the two-column nominee list/detail so it appears first -->
-                    <div id="appointee-container" class="mb-3"></div>
-                    <div class="flex items-start space-x-4">
-                        <div id="nominee-list" class="w-1/3 border-r pr-4 space-y-2 max-h-[50vh] overflow-y-auto">
-                            <!-- nominee list injected here -->
-                        </div>
-                        <div id="nominee-detail" class="w-2/3 pl-4">
-                            <!-- selected nominee details injected here (nominee cards will be rendered below the Appointee container) -->
-                        </div>
+                    <div class="mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
+                        <strong>Security Note:</strong> Data is stored locally in your browser. For production use,
+                        implement server-side storage and encryption.
+                    </div>
+
+                    <div class="mb-4">
+                        <input type="text" id="search-input" placeholder="Search by name or policy number..."
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div id="data-table-container" class="overflow-x-auto">
+                        <!-- Table will be generated here by JavaScript -->
                     </div>
                 </div>
             </div>
-            <div class="flex justify-end space-x-4 mt-6">
-                <button id="row-modal-edit" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Edit</button>
-                <button type="button" onclick="closeRowDetails()" class="bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300">Close</button>
+        </div>
+
+        <!-- Gemini AI Modal -->
+        <div id="gemini-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="modal-title" class="text-xl font-bold">AI Generated Content</h3>
+                    <button onclick="closeModal()"
+                        class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+                </div>
+                <div id="modal-body">
+                    <div class="flex items-center justify-center h-32">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button id="copy-button"
+                        class="bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition duration-300">Copy
+                        Text</button>
+                    <button onclick="closeModal()"
+                        class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">Close</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- All application logic is now in modular JavaScript files loaded by loader.js -->
-    <!-- init.js handles application initialization after modules load -->
-    <script>
-        // Reserved for any page-specific inline scripts if needed
-        // All application logic is in js/ modules
-    </script>
+        <!-- Row Details Modal -->
+        <div id="row-details-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="row-modal-title" class="text-xl font-bold">Policy Details</h3>
+                    <button onclick="closeRowDetails()"
+                        class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+                </div>
+                <!-- Modal tabs -->
+                <div class="mb-4 border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+                        <button id="modal-tab-overview"
+                            class="py-2 px-4 text-sm font-medium text-gray-700 border-b-2 border-transparent"
+                            type="button">Overview</button>
+                        <button id="modal-tab-prevpol"
+                            class="py-2 px-4 text-sm font-medium text-gray-700 border-b-2 border-transparent"
+                            type="button">Previous Policies</button>
+                        <button id="modal-tab-nominee"
+                            class="py-2 px-4 text-sm font-medium text-gray-700 border-b-2 border-transparent"
+                            type="button">Nominees</button>
+                    </nav>
+                </div>
+
+                <div id="row-modal-body" class="text-sm text-gray-700 max-h-[65vh] overflow-y-auto">
+                    <!-- Overview content -->
+                    <div id="row-modal-overview" class="grid gap-4 grid-cols-1 sm:grid-cols-2"></div>
+
+                    <!-- Previous policies content (hidden by default) -->
+                    <div id="row-modal-prevpol" class="hidden">
+                        <div class="flex items-start space-x-4">
+                            <div id="prevpol-list" class="w-1/3 border-r pr-4 space-y-2 max-h-[55vh] overflow-y-auto">
+                                <!-- policy list injected here -->
+                            </div>
+                            <div id="prevpol-detail" class="w-2/3 pl-4">
+                                <!-- selected policy details -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nominees content (hidden by default) - converted to a selectable list + detail pane -->
+                    <div id="row-modal-nominee" class="hidden">
+                        <!-- Appointee container placed above the two-column nominee list/detail so it appears first -->
+                        <div id="appointee-container" class="mb-3"></div>
+                        <div class="flex items-start space-x-4">
+                            <div id="nominee-list" class="w-1/3 border-r pr-4 space-y-2 max-h-[50vh] overflow-y-auto">
+                                <!-- nominee list injected here -->
+                            </div>
+                            <div id="nominee-detail" class="w-2/3 pl-4">
+                                <!-- selected nominee details injected here (nominee cards will be rendered below the Appointee container) -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button id="row-modal-edit"
+                        class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Edit</button>
+                    <button type="button" onclick="closeRowDetails()"
+                        class="bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- All application logic is now in modular JavaScript files loaded by loader.js -->
+        <!-- init.js handles application initialization after modules load -->
+        <script>
+            // Theme Toggle Functionality
+            (function () {
+                const themeToggle = document.getElementById('theme-toggle');
+                const body = document.body;
+
+                // Check for saved preference or system preference
+                const savedTheme = localStorage.getItem('theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+                // Apply initial theme
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    body.classList.add('dark');
+                }
+
+                // Toggle theme on button click
+                themeToggle.addEventListener('click', () => {
+                    body.classList.toggle('dark');
+                    const isDark = body.classList.contains('dark');
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+                    // Add a subtle animation feedback
+                    themeToggle.style.transform = 'scale(1.2) rotate(180deg)';
+                    setTimeout(() => {
+                        themeToggle.style.transform = '';
+                    }, 300);
+                });
+
+                // Listen for system preference changes
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                    if (!localStorage.getItem('theme')) {
+                        body.classList.toggle('dark', e.matches);
+                    }
+                });
+            })();
+        </script>
 </body>
+
 </html>
