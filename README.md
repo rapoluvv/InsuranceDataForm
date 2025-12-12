@@ -15,7 +15,7 @@ A web-based application for collecting and managing insurance policy data.
 
 ## Setup
 
-1. Open `Data Form-1.html` in a web browser
+1. Open `index.html` in a web browser
 2. No additional setup required for basic functionality
 
 ## API Integration

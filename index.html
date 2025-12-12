@@ -233,29 +233,41 @@
         input[type="date"],
         input[type="number"],
         input[type="tel"],
-        select {
+        select,
+        textarea {
             border-radius: 0.75rem;
             border: 1px solid var(--border);
             background: var(--surface);
             color: var(--text-primary);
             padding: 0.75rem 1rem;
             width: 100%;
-            height: 3.2rem;
             font-size: 0.95rem;
             transition: all 0.3s ease;
         }
 
-        input::placeholder {
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        input[type="number"],
+        input[type="tel"],
+        select {
+            height: 3.2rem;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
             color: var(--text-muted);
         }
 
         input:hover,
-        select:hover {
+        select:hover,
+        textarea:hover {
             border-color: var(--text-muted);
         }
 
         input:focus,
-        select:focus {
+        select:focus,
+        textarea:focus {
             outline: none;
             border-color: var(--primary-start);
             background: var(--surface-hover);
@@ -973,18 +985,21 @@
                                 </select>
                                 <span class="error-message text-red-500 text-sm mt-1"></span>
                             </div>
-                            <div class="md:col-span-2 hidden" id="corr-address-container"><label
-                                    for="corr_address">Correspondence Address</label><input type="text"
-                                    id="corr_address" name="corr_address" class="mt-1"><span
-                                    class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div class="md:col-span-2"><label for="address">Address as per KYC</label><input type="text"
-                                    id="address" name="address" class="mt-1"><span
-                                    class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div class="md:col-span-2 flex items-center space-x-3">
+                            <!-- Checkbox first, then address fields side by side -->
+                            <div class="md:col-span-2 flex items-center space-x-3 mt-2">
                                 <input type="checkbox" id="corr_same_kyc" name="corr_same_kyc" class="mt-1">
                                 <label for="corr_same_kyc" class="mb-0">Is the correspondence address same as
                                     KYC?</label>
                             </div>
+                            <div class="md:col-span-1"><label for="address">Address as per KYC</label><textarea
+                                    id="address" name="address" class="mt-1 w-full" rows="3"
+                                    style="resize: vertical; min-height: 80px;"></textarea><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div class="md:col-span-1" id="corr-address-container"><label
+                                    for="corr_address">Correspondence Address</label><textarea id="corr_address"
+                                    name="corr_address" class="mt-1 w-full" rows="3"
+                                    style="resize: vertical; min-height: 80px;"></textarea><span
+                                    class="error-message text-red-500 text-sm mt-1"></span></div>
                         </div>
                         <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)"
                                 class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr;

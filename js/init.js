@@ -381,5 +381,38 @@ window.addEventListener('modulesLoaded', function () {
         }
     });
 
+    // ========================================================================
+    // PREVENT FUTURE DATES ON ALL DATE INPUTS
+    // ========================================================================
+    function setMaxDateToToday() {
+        const today = new Date().toISOString().split('T')[0];
+        document.querySelectorAll('input[type="date"]').forEach(input => {
+            input.setAttribute('max', today);
+        });
+    }
+    setMaxDateToToday();
+
+    // Observer for dynamically created date inputs (e.g., nominee DOB in repeaters)
+    const dateObserver = new MutationObserver((mutations) => {
+        const today = new Date().toISOString().split('T')[0];
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (node.nodeType === 1) {
+                    // Check if the added node itself is a date input
+                    if (node.matches && node.matches('input[type="date"]')) {
+                        node.setAttribute('max', today);
+                    }
+                    // Check for date inputs within the added node
+                    if (node.querySelectorAll) {
+                        node.querySelectorAll('input[type="date"]').forEach(input => {
+                            input.setAttribute('max', today);
+                        });
+                    }
+                }
+            });
+        });
+    });
+    dateObserver.observe(document.body, { childList: true, subtree: true });
+
     console.log('Application initialized successfully');
 });
