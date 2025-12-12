@@ -58,13 +58,15 @@ function updateAgeFieldFromDOB(dobValue) {
 }
 
 /**
- * Validate Aadhaar number (must be 12 digits)
+ * Validate Aadhaar number (must be 12 digits, can be formatted with spaces or dashes)
  * @param {string} aadhaar - Aadhaar number to validate
  * @returns {boolean} True if valid
  */
 function validateAadhaar(aadhaar) {
     if (!aadhaar) return true; // Optional field
-    return /^\d{12}$/.test(aadhaar);
+    // Remove spaces and dashes to get just the digits
+    const digits = aadhaar.replace(/[\s-]/g, '');
+    return /^\d{12}$/.test(digits);
 }
 
 /**
@@ -104,17 +106,17 @@ function validateMobile(mobile) {
 function validateNomineeShares() {
     const errEl = document.getElementById('nominee-error');
     if (!errEl) return true;
-    
+
     // Get nominees from repeater if getNomineesFromRepeater is available
-    const nominees = (typeof window.getNomineesFromRepeater === 'function') 
-        ? window.getNomineesFromRepeater() 
+    const nominees = (typeof window.getNomineesFromRepeater === 'function')
+        ? window.getNomineesFromRepeater()
         : [];
-    
-    if (nominees.length === 0) { 
-        errEl.textContent = ''; 
-        return true; 
+
+    if (nominees.length === 0) {
+        errEl.textContent = '';
+        return true;
     }
-    
+
     const sum = nominees.reduce((s, n) => s + (parseFloat(n.share) || 0), 0);
     if (Math.abs(sum - 100) > 0.001) {
         errEl.textContent = `Total nominee shares must equal 100%. Current total: ${sum}%`;
@@ -147,15 +149,15 @@ function validateTab(tabIndex, formTabPanels) {
         } else if (input.type === 'number' && input.min !== '' && input.value !== '' && parseFloat(input.value) < parseFloat(input.min)) {
             errorMessage = `Value cannot be less than ${input.min}.`;
         } else if (input.id === 'aadhaar' && input.value && !validateAadhaar(input.value)) {
-            errorMessage = 'Aadhaar must be exactly 12 digits.';
+            errorMessage = 'Aadhaar must be exactly 12 digits (e.g., 1234 2345 3456).';
         } else if (input.id === 'pan' && input.value && !validatePAN(input.value)) {
             errorMessage = 'PAN must be in format: AAAAA9999A (5 letters, 4 digits, 1 letter).';
         }
-        
+
         if (errorMessage) {
             isValid = false;
             const errorSpan = input.parentElement.querySelector('.error-message');
-            if(errorSpan) errorSpan.textContent = errorMessage;
+            if (errorSpan) errorSpan.textContent = errorMessage;
         }
     });
     return isValid;
@@ -170,7 +172,7 @@ function validateAllTabs(formTabPanels) {
     let allTabsValid = true;
     let firstInvalidInput = null;
     let firstInvalidTab = null;
-    
+
     for (let i = 0; i < formTabPanels.length; i++) {
         const panel = formTabPanels[i];
         panel.querySelectorAll('.error-message').forEach(err => err.textContent = '');
@@ -186,7 +188,7 @@ function validateAllTabs(formTabPanels) {
             } else if (input.type === 'number' && input.min !== '' && input.value !== '' && parseFloat(input.value) < parseFloat(input.min)) {
                 errorMessage = `Value cannot be less than ${input.min}.`;
             } else if (input.id === 'aadhaar' && input.value && !validateAadhaar(input.value)) {
-                errorMessage = 'Aadhaar must be exactly 12 digits.';
+                errorMessage = 'Aadhaar must be exactly 12 digits (e.g., 1234 2345 3456).';
             } else if (input.id === 'pan' && input.value && !validatePAN(input.value)) {
                 errorMessage = 'PAN must be in format: AAAAA9999A (5 letters, 4 digits, 1 letter).';
             }

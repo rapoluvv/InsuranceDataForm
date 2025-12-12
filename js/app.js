@@ -8,6 +8,8 @@ let currentFormTabIndex = 0;
 let editingIndex = null;
 const formTabPanels = document.querySelectorAll('.form-tab-panel');
 const formTabsNav = document.getElementById('form-tabs-nav');
+// Track which tabs have been visited (for showing warning indicators)
+const visitedTabs = new Set([0]); // First tab is visited by default
 
 // Currency formatting helpers
 function stripFormatting(val) {
@@ -41,7 +43,12 @@ function updateMarriageDependentVisibility(value) {
         if (show) el.classList.remove('hidden'); else el.classList.add('hidden');
         const inputs = el.querySelectorAll('input, select, textarea');
         inputs.forEach(i => {
-            if (show) i.setAttribute('required', 'required'); else i.removeAttribute('required');
+            // Date of marriage (d_marriage) is NOT required, only spouse name is required
+            if (i.id === 'd_marriage') {
+                i.removeAttribute('required');
+            } else {
+                if (show) i.setAttribute('required', 'required'); else i.removeAttribute('required');
+            }
         });
     });
     if (!show) {
@@ -170,12 +177,7 @@ function initializeFormTabs() {
         step.appendChild(label);
 
         step.onclick = () => {
-            if (index > currentFormTabIndex) {
-                if (typeof window.validateTab === 'function' && !window.validateTab(currentFormTabIndex, formTabPanels)) {
-                    alert('Please fill all mandatory fields in the current tab before proceeding.');
-                    return;
-                }
-            }
+            // Allow free navigation between tabs without validation
             showFormTab(index);
         };
 
@@ -187,12 +189,71 @@ function updateProgress() {
     // Update stepper states instead of progress bar
     const steps = formTabsNav.querySelectorAll('.stepper-step');
     steps.forEach((step, index) => {
-        step.classList.remove('active', 'completed');
-        if (index < currentFormTabIndex) {
-            step.classList.add('completed');
-        } else if (index === currentFormTabIndex) {
-            step.classList.add('active');
+        step.classList.remove('active', 'completed', 'has-errors');
+
+        // Check if this tab has missing required fields or validation errors
+        const panel = formTabPanels[index];
+        let hasMissingRequired = false;
+        if (panel) {
+            const requiredInputs = panel.querySelectorAll('input[required], select[required], textarea[required]');
+            requiredInputs.forEach(input => {
+                // Check if the input is in a conditionally hidden container (not the panel itself)
+                // We want to skip inputs that are in hidden containers WITHIN the panel,
+                // like .marriage-dependent.hidden, but NOT skip just because the panel is hidden
+                let isConditionallyHidden = false;
+                let parent = input.parentElement;
+                while (parent && parent !== panel) {
+                    if (parent.classList.contains('hidden')) {
+                        isConditionallyHidden = true;
+                        break;
+                    }
+                    parent = parent.parentElement;
+                }
+
+                if (!isConditionallyHidden) {
+                    // Check if the field is empty
+                    const value = input.value ? input.value.trim() : '';
+                    if (!value) {
+                        hasMissingRequired = true;
+                    }
+                }
+            });
+
+            // Also check for format validation errors (Aadhaar, PAN, email, etc.)
+            const aadhaarInput = panel.querySelector('#aadhaar');
+            if (aadhaarInput && aadhaarInput.value) {
+                const digits = aadhaarInput.value.replace(/[\s-]/g, '');
+                if (!/^\d{12}$/.test(digits)) {
+                    hasMissingRequired = true;
+                }
+            }
+
+            const panInput = panel.querySelector('#pan');
+            if (panInput && panInput.value && !/^[A-Z]{5}\d{4}[A-Z]$/.test(panInput.value)) {
+                hasMissingRequired = true;
+            }
+
+            const emailInput = panel.querySelector('#email');
+            if (emailInput && emailInput.value && !/^\S+@\S+\.\S+$/.test(emailInput.value)) {
+                hasMissingRequired = true;
+            }
         }
+
+        if (index === currentFormTabIndex) {
+            // Current active tab
+            step.classList.add('active');
+            if (hasMissingRequired) {
+                step.classList.add('has-errors');
+            }
+        } else if (visitedTabs.has(index)) {
+            // Previously visited tabs - show completed or warning based on status
+            if (hasMissingRequired) {
+                step.classList.add('has-errors');
+            } else {
+                step.classList.add('completed');
+            }
+        }
+        // Future tabs that haven't been visited yet remain neutral (no class added)
     });
 }
 
@@ -200,6 +261,8 @@ function showFormTab(tabIndex) {
     formTabPanels.forEach(panel => panel.classList.add('hidden'));
     formTabPanels[tabIndex].classList.remove('hidden');
     currentFormTabIndex = tabIndex;
+    // Mark this tab as visited
+    visitedTabs.add(tabIndex);
     updateProgress();
     try {
         if (typeof window.scrollElementToTop === 'function') {
@@ -211,13 +274,7 @@ function showFormTab(tabIndex) {
 function navigateFormTab(direction) {
     const newIndex = currentFormTabIndex + direction;
     if (newIndex < 0 || newIndex >= formTabPanels.length) return;
-
-    if (direction > 0) {
-        if (typeof window.validateTab === 'function' && !window.validateTab(currentFormTabIndex, formTabPanels)) {
-            alert('Please fill all mandatory fields in the current tab before proceeding.');
-            return;
-        }
-    }
+    // Allow free navigation between tabs without validation blocking
     showFormTab(newIndex);
 }
 
@@ -1185,9 +1242,17 @@ function updateCorrAddressVisibility() {
     }
 }
 
+// Function to reset visited tabs (used when form is reset)
+function resetVisitedTabs() {
+    visitedTabs.clear();
+    visitedTabs.add(0); // First tab is always visited by default
+}
+
 // Expose functions globally
 window.currentFormTabIndex = currentFormTabIndex;
 window.editingIndex = editingIndex;
+window.visitedTabs = visitedTabs;
+window.resetVisitedTabs = resetVisitedTabs;
 window.stripFormatting = stripFormatting;
 window.formatIndianNumber = formatIndianNumber;
 window.updateMarriageDependentVisibility = updateMarriageDependentVisibility;

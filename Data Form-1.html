@@ -709,6 +709,51 @@
             color: var(--success);
         }
 
+        /* Stepper step with missing required fields */
+        .stepper-step.has-errors .step-circle {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .stepper-step.has-errors .step-circle::after {
+            content: '!';
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .stepper-step.has-errors .step-number {
+            display: none;
+        }
+
+        .stepper-step.has-errors .step-label {
+            color: var(--warning);
+        }
+
+        /* When a step has errors AND is active, show both indicators */
+        .stepper-step.active.has-errors .step-circle {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            animation: pulse-warning 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-warning {
+
+            0%,
+            100% {
+                box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 4px 25px rgba(245, 158, 11, 0.6);
+            }
+        }
+
+        /* Connecting line shows warning color for incomplete steps */
+        .stepper-step.has-errors:not(:last-child)::after {
+            background: linear-gradient(90deg, var(--warning), #d97706);
+        }
+
         /* Responsive Adjustments */
         @media (max-width: 640px) {
             .theme-toggle {
@@ -881,10 +926,9 @@
                                         class="required-asterisk">*</span></label><input type="text" id="spouse"
                                     name="spouse" class="mt-1"><span
                                     class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div class="marriage-dependent hidden"><label for="d_marriage">Date of Marriage <span
-                                        class="required-asterisk">*</span></label><input type="date" id="d_marriage"
-                                    name="d_marriage" class="mt-1"><span
-                                    class="error-message text-red-500 text-sm mt-1"></span></div>
+                            <div class="marriage-dependent hidden"><label for="d_marriage">Date of
+                                    Marriage</label><input type="date" id="d_marriage" name="d_marriage"
+                                    class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
 
                         </div>
                         <div class="flex justify-end mt-6"><button type="button" onclick="navigateFormTab(1)"
