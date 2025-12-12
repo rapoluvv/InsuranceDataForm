@@ -15,11 +15,21 @@ window.addEventListener('modulesLoaded', function () {
     const formEl = document.getElementById('data-form');
     if (formEl) formEl.noValidate = true;
 
+    const clearValidationErrorForField = (target) => {
+        if (!target || typeof window.getFieldValidationMessage !== 'function') return;
+        const errorSpan = target.parentElement ? target.parentElement.querySelector('.error-message') : null;
+        if (!errorSpan || !errorSpan.textContent) return;
+        if (!window.getFieldValidationMessage(target)) {
+            errorSpan.textContent = '';
+        }
+    };
+
     // Update progress indicator when any required field changes (real-time feedback)
     if (formEl) {
         formEl.addEventListener('input', function (event) {
             // Only update progress for required fields to avoid performance issues
             const target = event.target;
+            clearValidationErrorForField(target);
             if (target.hasAttribute('required') || target.tagName === 'SELECT') {
                 // Debounce the update
                 if (window._progressUpdateTimeout) {
@@ -34,6 +44,7 @@ window.addEventListener('modulesLoaded', function () {
         // Also update on change events (for select dropdowns)
         formEl.addEventListener('change', function (event) {
             const target = event.target;
+            clearValidationErrorForField(target);
             if (target.hasAttribute('required') || target.tagName === 'SELECT') {
                 setTimeout(() => {
                     window.updateProgress();

@@ -115,6 +115,7 @@
             window.validateNomineeShares = window.ValidationModule.validateNomineeShares;
             window.validateTab = window.ValidationModule.validateTab;
             window.validateAllTabs = window.ValidationModule.validateAllTabs;
+            window.getFieldValidationMessage = window.ValidationModule.getFieldValidationMessage;
         }
 
         // UI Module functions

@@ -58,6 +58,43 @@ function updateAgeFieldFromDOB(dobValue) {
 }
 
 /**
+ * Determine the validation message for a single field if invalid
+ * @param {HTMLElement} field - Form control element to validate
+ * @returns {string} The validation message or an empty string when the field is valid
+ */
+function getFieldValidationMessage(field) {
+    if (!field) return '';
+    const rawValue = field.value || '';
+    const trimmedValue = rawValue.trim();
+    if (field.required && trimmedValue === '') {
+        return 'This field is required.';
+    }
+    const type = String(field.type || '').toLowerCase();
+    if (type === 'email' && rawValue && !validateEmail(rawValue)) {
+        return 'Please enter a valid email address.';
+    }
+    if (type === 'tel' && rawValue && field.pattern) {
+        try {
+            if (!new RegExp(field.pattern).test(rawValue)) {
+                return field.title || 'Please enter a valid number.';
+            }
+        } catch (e) {
+            // Malformed pattern should not crash validation
+        }
+    }
+    if (type === 'number' && field.min !== '' && trimmedValue !== '' && parseFloat(rawValue) < parseFloat(field.min)) {
+        return `Value cannot be less than ${field.min}.`;
+    }
+    if (field.id === 'aadhaar' && rawValue && !validateAadhaar(rawValue)) {
+        return 'Aadhaar must be exactly 12 digits (e.g., 1234 2345 3456).';
+    }
+    if (field.id === 'pan' && rawValue && !validatePAN(rawValue)) {
+        return 'PAN must be in format: AAAAA9999A (5 letters, 4 digits, 1 letter).';
+    }
+    return '';
+}
+
+/**
  * Validate Aadhaar number (must be 12 digits, can be formatted with spaces or dashes)
  * @param {string} aadhaar - Aadhaar number to validate
  * @returns {boolean} True if valid
@@ -139,21 +176,7 @@ function validateTab(tabIndex, formTabPanels) {
 
     const inputs = panel.querySelectorAll('input[required], select[required], input[type="email"], input[type="tel"], input[min]');
     inputs.forEach(input => {
-        let errorMessage = '';
-        if (input.required && !input.value.trim()) {
-            errorMessage = 'This field is required.';
-        } else if (input.type === 'email' && input.value && !validateEmail(input.value)) {
-            errorMessage = 'Please enter a valid email address.';
-        } else if (input.type === 'tel' && input.value && input.pattern && !new RegExp(input.pattern).test(input.value)) {
-            errorMessage = input.title || 'Please enter a valid number.';
-        } else if (input.type === 'number' && input.min !== '' && input.value !== '' && parseFloat(input.value) < parseFloat(input.min)) {
-            errorMessage = `Value cannot be less than ${input.min}.`;
-        } else if (input.id === 'aadhaar' && input.value && !validateAadhaar(input.value)) {
-            errorMessage = 'Aadhaar must be exactly 12 digits (e.g., 1234 2345 3456).';
-        } else if (input.id === 'pan' && input.value && !validatePAN(input.value)) {
-            errorMessage = 'PAN must be in format: AAAAA9999A (5 letters, 4 digits, 1 letter).';
-        }
-
+        const errorMessage = getFieldValidationMessage(input);
         if (errorMessage) {
             isValid = false;
             const errorSpan = input.parentElement.querySelector('.error-message');
@@ -178,21 +201,7 @@ function validateAllTabs(formTabPanels) {
         panel.querySelectorAll('.error-message').forEach(err => err.textContent = '');
         const inputs = panel.querySelectorAll('input[required], select[required], input[type="email"], input[type="tel"], input[min]');
         inputs.forEach(input => {
-            let errorMessage = '';
-            if (input.required && !input.value.trim()) {
-                errorMessage = 'This field is required.';
-            } else if (input.type === 'email' && input.value && !validateEmail(input.value)) {
-                errorMessage = 'Please enter a valid email address.';
-            } else if (input.type === 'tel' && input.required && input.value && input.pattern && !new RegExp(input.pattern).test(input.value)) {
-                errorMessage = input.title || 'Please enter a valid 10-digit mobile number.';
-            } else if (input.type === 'number' && input.min !== '' && input.value !== '' && parseFloat(input.value) < parseFloat(input.min)) {
-                errorMessage = `Value cannot be less than ${input.min}.`;
-            } else if (input.id === 'aadhaar' && input.value && !validateAadhaar(input.value)) {
-                errorMessage = 'Aadhaar must be exactly 12 digits (e.g., 1234 2345 3456).';
-            } else if (input.id === 'pan' && input.value && !validatePAN(input.value)) {
-                errorMessage = 'PAN must be in format: AAAAA9999A (5 letters, 4 digits, 1 letter).';
-            }
-
+            const errorMessage = getFieldValidationMessage(input);
             if (errorMessage) {
                 allTabsValid = false;
                 const errorSpan = input.parentElement.querySelector('.error-message');
@@ -229,7 +238,8 @@ if (typeof module !== 'undefined' && module.exports) {
         validateMobile,
         validateNomineeShares,
         validateTab,
-        validateAllTabs
+        validateAllTabs,
+        getFieldValidationMessage
     };
 } else {
     window.ValidationModule = {
@@ -242,6 +252,7 @@ if (typeof module !== 'undefined' && module.exports) {
         validateMobile,
         validateNomineeShares,
         validateTab,
-        validateAllTabs
+        validateAllTabs,
+        getFieldValidationMessage
     };
 }
