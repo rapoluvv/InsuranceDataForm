@@ -475,8 +475,8 @@ async function openRowDetails(index) {
     function computeVisibleForRow(r) {
         const visible = new Set(CSV_HEADERS);
 
-        // Marriage-dependent fields
-        if (r.marital_status !== 'Married') {
+        // Marriage-dependent fields (is_married, not marital_status)
+        if (r.is_married !== 'Yes') {
             visible.delete('spouse');
             visible.delete('d_marriage');
         }
@@ -486,55 +486,60 @@ async function openRowDetails(index) {
             visible.delete('dating_back_date');
         }
 
-        // Operations visibility
-        if (r.operations !== 'Yes') {
-            visible.delete('operations_details');
+        // Operations visibility (any_operations, operation_details)
+        if (r.any_operations !== 'Yes') {
+            visible.delete('operation_details');
         }
 
-        // Diseases visibility
+        // Diseases visibility (any_diseases, disease_details)
         if (r.any_diseases !== 'Yes') {
-            visible.delete('any_diseases_details');
+            visible.delete('disease_details');
         }
 
         // Correspondence address visibility
-        if (r.corr_same_kyc === 'true' || r.corr_same_kyc === true) {
+        if (r.corr_same_kyc === 'on' || r.corr_same_kyc === 'true' || r.corr_same_kyc === true) {
             visible.delete('corr_address');
         }
 
-        // Pregnancy/Husband visibility (gender-dependent)
+        // Gender-dependent fields
         if (r.gender !== 'Female') {
-            visible.delete('pregnant');
-            visible.delete('husband');
+            visible.delete('are_pregnant');
+            visible.delete('last_delivery_date');
+            visible.delete('husband_occupation');
+            visible.delete('husband_annual_income');
         } else {
-            // For females, check children count for delivery date visibility
-            let childCount = 0;
-            try {
-                const ch = Array.isArray(r.fam_children) ? r.fam_children : (r.fam_children ? JSON.parse(r.fam_children) : []);
-                childCount = ch.length;
-            } catch (e) { childCount = 0; }
-            if (childCount === 0) {
-                visible.delete('last_delivery_date');
+            // For females, check pregnancy for delivery date visibility
+            if (r.are_pregnant !== 'Yes') {
+                // Still show if they have children
+                let childCount = 0;
+                try {
+                    const ch = Array.isArray(r.fam_children) ? r.fam_children : (r.fam_children ? JSON.parse(r.fam_children) : []);
+                    childCount = ch.length;
+                } catch (e) { childCount = 0; }
+                if (childCount === 0) {
+                    visible.delete('last_delivery_date');
+                }
             }
         }
 
-        // Parent death details visibility
-        if (r.father_state !== 'Dead') {
-            visible.delete('father_died_age');
-            visible.delete('father_died_year');
-            visible.delete('father_died_cause');
+        // Parent death details visibility (with fam_ prefix)
+        if (r.fam_father_state !== 'Dead') {
+            visible.delete('fam_father_died_age');
+            visible.delete('fam_father_died_year');
+            visible.delete('fam_father_died_cause');
         }
-        if (r.mother_state !== 'Dead') {
-            visible.delete('mother_died_age');
-            visible.delete('mother_died_year');
-            visible.delete('mother_died_cause');
+        if (r.fam_mother_state !== 'Dead') {
+            visible.delete('fam_mother_died_age');
+            visible.delete('fam_mother_died_year');
+            visible.delete('fam_mother_died_cause');
         }
-        if (r.marital_status === 'Married' && r.spouse_state !== 'Dead') {
-            visible.delete('spouse_died_age');
-            visible.delete('spouse_died_year');
-            visible.delete('spouse_died_cause');
+        if (r.is_married === 'Yes' && r.fam_spouse_state !== 'Dead') {
+            visible.delete('fam_spouse_died_age');
+            visible.delete('fam_spouse_died_year');
+            visible.delete('fam_spouse_died_cause');
         }
 
-        // Sibling/child repeater fields
+        // Sibling/child repeater fields (handled separately)
         const repeaterPrefixes = ['fam_brother_', 'fam_sister_', 'fam_child_'];
         repeaterPrefixes.forEach(prefix => {
             CSV_HEADERS.forEach(k => {
@@ -552,7 +557,8 @@ async function openRowDetails(index) {
     overviewEl.innerHTML = '';
 
     Object.entries(grouped).forEach(([sectionName, keys]) => {
-        if (sectionName === 'Other' || keys.length === 0) return;
+        // Skip 'Other', 'Nominee' (has its own tab), and empty sections
+        if (sectionName === 'Other' || sectionName === 'Nominee' || keys.length === 0) return;
 
         const keysFiltered = keys.filter(k => CSV_HEADERS.includes(k));
         if (keysFiltered.length === 0) return;
@@ -591,9 +597,9 @@ async function openRowDetails(index) {
                 });
             }
 
-            const fatherKeys = keysFiltered.filter(k => k.startsWith('father_'));
-            const motherKeys = keysFiltered.filter(k => k.startsWith('mother_'));
-            const spouseKeys = keysFiltered.filter(k => k.startsWith('spouse_'));
+            const fatherKeys = keysFiltered.filter(k => k.startsWith('fam_father_'));
+            const motherKeys = keysFiltered.filter(k => k.startsWith('fam_mother_'));
+            const spouseKeys = keysFiltered.filter(k => k.startsWith('fam_spouse_'));
             const otherKeys = keysFiltered.filter(k => !fatherKeys.includes(k) && !motherKeys.includes(k) && !spouseKeys.includes(k));
 
             if (fatherKeys.length > 0) renderSubsection('Father', fatherKeys);
@@ -1226,19 +1232,30 @@ function loadRepeatersFromData(data = {}) {
 // Correspondence Address Visibility
 function updateCorrAddressVisibility() {
     const corrCheckbox = document.getElementById('corr_same_kyc');
-    const corrContainer = document.getElementById('corr-address-container');
     const corrAddressInput = document.getElementById('corr_address');
     const kycAddressInput = document.getElementById('address');
 
     if (!corrCheckbox) return;
 
     if (corrCheckbox.checked) {
-        if (corrContainer) corrContainer.classList.add('hidden');
-        if (corrAddressInput && kycAddressInput) {
-            corrAddressInput.value = kycAddressInput.value || '';
+        // Make correspondence address readonly and copy KYC address value
+        if (corrAddressInput) {
+            corrAddressInput.readOnly = true;
+            corrAddressInput.style.backgroundColor = 'var(--surface-elevated)';
+            corrAddressInput.style.opacity = '0.7';
+            corrAddressInput.style.cursor = 'not-allowed';
+            if (kycAddressInput) {
+                corrAddressInput.value = kycAddressInput.value || '';
+            }
         }
     } else {
-        if (corrContainer) corrContainer.classList.remove('hidden');
+        // Make correspondence address editable
+        if (corrAddressInput) {
+            corrAddressInput.readOnly = false;
+            corrAddressInput.style.backgroundColor = '';
+            corrAddressInput.style.opacity = '';
+            corrAddressInput.style.cursor = '';
+        }
     }
 }
 
