@@ -238,8 +238,10 @@ function executeTabSwitch(tabId) {
  * @param {string} message - Modal message content
  * @param {Function} onConfirm - Callback when user clicks Confirm
  * @param {Function} onCancel - Callback when user clicks Cancel
+ * @param {string} confirmText - Text for confirm button (default: Confirm)
+ * @param {string} cancelText - Text for cancel button (default: Cancel)
  */
-function showConfirmationModal(title, message, onConfirm, onCancel) {
+function showConfirmationModal(title, message, onConfirm, onCancel, confirmText = 'Confirm', cancelText = 'Cancel') {
     const modal = document.getElementById('confirmation-modal');
     const titleEl = document.getElementById('confirm-modal-title');
     const bodyEl = document.getElementById('confirm-modal-body');
@@ -250,6 +252,11 @@ function showConfirmationModal(title, message, onConfirm, onCancel) {
 
     if (titleEl) titleEl.textContent = title;
     if (bodyEl) bodyEl.innerHTML = message;
+    if (okBtn) okBtn.textContent = confirmText;
+    if (cancelBtn) {
+        cancelBtn.textContent = cancelText;
+        cancelBtn.classList.remove('hidden'); // Ensure visible
+    }
 
     // Clone buttons to strip old event listeners
     const newOkBtn = okBtn.cloneNode(true);
@@ -269,6 +276,41 @@ function showConfirmationModal(title, message, onConfirm, onCancel) {
 
     modal.classList.remove('hidden');
     // Lock scroll
+    document.body.classList.add('overflow-hidden');
+}
+
+/**
+ * Show a simple alert modal (reuses confirmation modal but hides cancel button)
+ * @param {string} title 
+ * @param {string} message 
+ * @param {Function} onOk 
+ */
+function showAlertModal(title, message, onOk) {
+    const modal = document.getElementById('confirmation-modal');
+    const titleEl = document.getElementById('confirm-modal-title');
+    const bodyEl = document.getElementById('confirm-modal-body');
+    const okBtn = document.getElementById('confirm-ok-btn');
+    const cancelBtn = document.getElementById('confirm-cancel-btn');
+
+    if (!modal) return;
+
+    if (titleEl) titleEl.textContent = title;
+    if (bodyEl) bodyEl.innerHTML = message;
+    if (okBtn) okBtn.textContent = 'OK';
+
+    // Hide cancel button for alert
+    if (cancelBtn) cancelBtn.classList.add('hidden');
+
+    const newOkBtn = okBtn.cloneNode(true);
+    okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+
+    newOkBtn.onclick = function () {
+        closeConfirmationModal();
+        if (typeof onOk === 'function') onOk();
+    };
+
+    // Ensure modal isn't hidden if open
+    modal.classList.remove('hidden');
     document.body.classList.add('overflow-hidden');
 }
 
@@ -414,6 +456,7 @@ if (typeof module !== 'undefined' && module.exports) {
         filterDataTable,
         showToast,
         showConfirmationModal,
+        showAlertModal,
         closeConfirmationModal
     };
 } else {
@@ -431,6 +474,7 @@ if (typeof module !== 'undefined' && module.exports) {
         filterDataTable,
         showToast,
         showConfirmationModal,
+        showAlertModal,
         closeConfirmationModal
     };
 }

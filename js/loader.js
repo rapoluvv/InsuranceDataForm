@@ -139,6 +139,7 @@
             window.filterDataTable = window.UIModule.filterDataTable;
             window.showToast = window.UIModule.showToast;
             window.showConfirmationModal = window.UIModule.showConfirmationModal;
+            window.showAlertModal = window.UIModule.showAlertModal;
             window.closeConfirmationModal = window.UIModule.closeConfirmationModal;
         }
 
