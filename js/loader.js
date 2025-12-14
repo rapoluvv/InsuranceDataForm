@@ -9,7 +9,7 @@
  * Monitor application load times if additional modules are added in future.
  */
 
-(function() {
+(function () {
     'use strict';
 
     // Track loaded modules
@@ -18,6 +18,7 @@
         validation: false,
         ui: false,
         ai: false,
+        utils: false,
         app: false
     };
 
@@ -27,6 +28,7 @@
         validation: 'js/validation.js',
         ui: 'js/ui.js',
         ai: 'js/ai.js',
+        utils: 'js/utils.js',
         app: 'js/app.js'
     };
 
@@ -52,7 +54,7 @@
     async function loadModules() {
         try {
             console.log('Loading modules...');
-            
+
             // Load modules in dependency order
             await loadScript(MODULE_PATHS.data);
             loadedModules.data = true;
@@ -70,6 +72,10 @@
             loadedModules.ai = true;
             console.log('✓ AI module loaded');
 
+            await loadScript(MODULE_PATHS.utils);
+            loadedModules.utils = true;
+            console.log('✓ Utils module loaded');
+
             await loadScript(MODULE_PATHS.app);
             loadedModules.app = true;
             console.log('✓ App module loaded');
@@ -77,10 +83,10 @@
             // All modules loaded successfully
             console.log('All modules loaded successfully!');
             exposeGlobalFunctions();
-            
+
             // Dispatch custom event to notify that modules are ready
             window.dispatchEvent(new CustomEvent('modulesLoaded'));
-            
+
         } catch (error) {
             console.error('Error loading modules:', error);
             alert('Failed to load application modules. Please refresh the page.');
@@ -131,6 +137,9 @@
             window.showMainTab = window.UIModule.showMainTab;
             window.renderDataTable = window.UIModule.renderDataTable;
             window.filterDataTable = window.UIModule.filterDataTable;
+            window.showToast = window.UIModule.showToast;
+            window.showConfirmationModal = window.UIModule.showConfirmationModal;
+            window.closeConfirmationModal = window.UIModule.closeConfirmationModal;
         }
 
         // AI Module functions
@@ -139,6 +148,17 @@
             window.generateSummary = window.AIModule.generateSummary;
             window.API_KEY = window.AIModule.API_KEY;
             window.API_URL = window.AIModule.API_URL;
+        }
+
+        // Utils Module functions
+        if (window.UtilsModule) {
+            window.PREV_POLICY_KEYS = window.UtilsModule.PREV_POLICY_KEYS;
+            window.PREV_POLICY_CLASS_MAP = window.UtilsModule.PREV_POLICY_CLASS_MAP;
+            window.FAMILY_MEMBER_CONFIG = window.UtilsModule.FAMILY_MEMBER_CONFIG;
+            window.updateConditionalVisibility = window.UtilsModule.updateConditionalVisibility;
+            window.setRequiredIfVisible = window.UtilsModule.setRequiredIfVisible;
+            window.getClassForKey = window.UtilsModule.getClassForKey;
+            window.createFamilyMemberNode = window.UtilsModule.createFamilyMemberNode;
         }
 
         console.log('Global functions exposed for backward compatibility');
