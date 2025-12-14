@@ -12,11 +12,11 @@ function openModal(title) {
     document.getElementById('modal-body').innerHTML = `<div class="flex items-center justify-center h-32"><div class="loader"></div></div>`;
     const gm = document.getElementById('gemini-modal');
     gm.classList.remove('hidden');
-    try { 
-        const content = gm.querySelector('.modal-content'); 
-        scrollElementToTop(content); 
-        const body = document.getElementById('modal-body'); 
-        if (body) scrollElementToTop(body); 
+    try {
+        const content = gm.querySelector('.modal-content');
+        scrollElementToTop(content);
+        const body = document.getElementById('modal-body');
+        if (body) scrollElementToTop(body);
     } catch (e) { /* ignore */ }
 }
 
@@ -43,27 +43,27 @@ function openRowDetailsModal(title, content) {
     const modal = document.getElementById('row-details-modal');
     const titleEl = document.getElementById('row-modal-title');
     const overviewEl = document.getElementById('row-modal-overview');
-    
+
     if (titleEl) titleEl.innerText = title;
     if (overviewEl) overviewEl.innerHTML = content;
-    
+
     // Show overview tab, hide others
     const overviewTab = document.querySelector('[data-tab="overview"]');
     const prevpolTab = document.querySelector('[data-tab="prevpol"]');
     const nomineeTab = document.querySelector('[data-tab="nominee"]');
-    
+
     if (overviewTab) overviewTab.classList.add('border-b-2', 'border-blue-500', 'text-blue-600');
     if (prevpolTab) prevpolTab.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600');
     if (nomineeTab) nomineeTab.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600');
-    
+
     const overviewContent = document.getElementById('row-modal-overview');
     const prevpolContent = document.getElementById('row-modal-prevpol');
     const nomineeContent = document.getElementById('row-modal-nominee');
-    
+
     if (overviewContent) overviewContent.classList.remove('hidden');
     if (prevpolContent) prevpolContent.classList.add('hidden');
     if (nomineeContent) nomineeContent.classList.add('hidden');
-    
+
     modal.classList.remove('hidden');
 }
 
@@ -153,12 +153,12 @@ function formatAIContentToHTML(text) {
 function showModalContent(content) {
     const html = formatAIContentToHTML(content);
     document.getElementById('modal-body').innerHTML = html;
-    try { 
-        const gm = document.getElementById('gemini-modal'); 
-        const contentEl = gm.querySelector('.modal-content'); 
-        scrollElementToTop(contentEl); 
-        const body = document.getElementById('modal-body'); 
-        if (body) scrollElementToTop(body); 
+    try {
+        const gm = document.getElementById('gemini-modal');
+        const contentEl = gm.querySelector('.modal-content');
+        scrollElementToTop(contentEl);
+        const body = document.getElementById('modal-body');
+        if (body) scrollElementToTop(body);
     } catch (e) { /* ignore */ }
 }
 
@@ -190,6 +190,36 @@ function scrollElementToTop(el) {
  * @param {string} tabId - ID of the tab to show
  */
 function showMainTab(tabId) {
+    // Check for unsaved changes or active edit session
+    const isEditing = typeof window.editingIndex === 'number' && window.editingIndex !== null;
+
+    if (tabId === 'data-view' && (window.isFormDirty || isEditing)) {
+        const message = isEditing
+            ? "You are currently editing a record. Switching to the View Data tab will cancel your edit and discard any changes.<br><br><strong>Are you sure you want to cancel editing?</strong>"
+            : "You have unsaved changes. Switching to the View Data tab will discard them.<br><br><strong>Are you sure you want to discard changes?</strong>";
+
+        showConfirmationModal(
+            isEditing ? "Cancel Edit?" : "Unsaved Changes",
+            message,
+            function () {
+                // On Confirm
+                if (typeof window.resetFormState === 'function') {
+                    window.resetFormState();
+                }
+                // Proceed to switch tab
+                executeTabSwitch(tabId);
+            },
+            function () {
+                // On Cancel - do nothing, stay on form
+            }
+        );
+        return;
+    }
+
+    executeTabSwitch(tabId);
+}
+
+function executeTabSwitch(tabId) {
     document.getElementById('form-view').classList.toggle('hidden', tabId !== 'form-view');
     document.getElementById('data-view').classList.toggle('hidden', tabId !== 'data-view');
     document.getElementById('form-tab-button').classList.toggle('active', tabId === 'form-view');
@@ -197,9 +227,60 @@ function showMainTab(tabId) {
     if (tabId === 'data-view' && typeof window.renderDataTable === 'function') {
         window.renderDataTable();
     }
-    try { 
-        scrollElementToTop(tabId === 'form-view' ? document.getElementById('form-view') : document.getElementById('data-view')); 
+    try {
+        scrollElementToTop(tabId === 'form-view' ? document.getElementById('form-view') : document.getElementById('data-view'));
     } catch (e) { /* ignore */ }
+}
+
+/**
+ * Show a custom confirmation modal
+ * @param {string} title - Modal title
+ * @param {string} message - Modal message content
+ * @param {Function} onConfirm - Callback when user clicks Confirm
+ * @param {Function} onCancel - Callback when user clicks Cancel
+ */
+function showConfirmationModal(title, message, onConfirm, onCancel) {
+    const modal = document.getElementById('confirmation-modal');
+    const titleEl = document.getElementById('confirm-modal-title');
+    const bodyEl = document.getElementById('confirm-modal-body');
+    const okBtn = document.getElementById('confirm-ok-btn');
+    const cancelBtn = document.getElementById('confirm-cancel-btn');
+
+    if (!modal) return;
+
+    if (titleEl) titleEl.textContent = title;
+    if (bodyEl) bodyEl.innerHTML = message;
+
+    // Clone buttons to strip old event listeners
+    const newOkBtn = okBtn.cloneNode(true);
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+    newOkBtn.onclick = function () {
+        closeConfirmationModal();
+        if (typeof onConfirm === 'function') onConfirm();
+    };
+
+    newCancelBtn.onclick = function () {
+        closeConfirmationModal();
+        if (typeof onCancel === 'function') onCancel();
+    };
+
+    modal.classList.remove('hidden');
+    // Lock scroll
+    document.body.classList.add('overflow-hidden');
+}
+
+/**
+ * Close the confirmation modal
+ */
+function closeConfirmationModal() {
+    const modal = document.getElementById('confirmation-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
 }
 
 /**
@@ -207,10 +288,10 @@ function showMainTab(tabId) {
  */
 async function renderDataTable() {
     // Get data from DataModule if available
-    const allData = (typeof window.DataModule !== 'undefined') 
-        ? await window.DataModule.getStoredData() 
+    const allData = (typeof window.DataModule !== 'undefined')
+        ? await window.DataModule.getStoredData()
         : [];
-    
+
     const tableContainer = document.getElementById('data-table-container');
 
     if (!tableContainer) return;
@@ -267,6 +348,56 @@ function filterDataTable() {
     });
 }
 
+/**
+ * Show a toast notification
+ * @param {string} message - The message to display
+ * @param {string} type - Type: 'success', 'error', 'warning', 'info'
+ * @param {number} duration - Duration in ms (default 3000)
+ */
+function showToast(message, type = 'info', duration = 3000) {
+    // Ensure toast container exists
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    // Toast icons
+    const icons = {
+        success: '✓',
+        error: '✕',
+        warning: '!',
+        info: 'i'
+    };
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.style.setProperty('--toast-duration', `${duration}ms`);
+
+    toast.innerHTML = `
+        <div class="toast-icon">${icons[type] || icons.info}</div>
+        <div class="toast-content">
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+        <div class="toast-progress"></div>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto-remove after duration + fade out time
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.remove();
+        }
+    }, duration + 300);
+
+    return toast;
+}
+
 // Browser-compatible exports
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
@@ -280,7 +411,10 @@ if (typeof module !== 'undefined' && module.exports) {
         scrollElementToTop,
         showMainTab,
         renderDataTable,
-        filterDataTable
+        filterDataTable,
+        showToast,
+        showConfirmationModal,
+        closeConfirmationModal
     };
 } else {
     window.UIModule = {
@@ -294,6 +428,9 @@ if (typeof module !== 'undefined' && module.exports) {
         scrollElementToTop,
         showMainTab,
         renderDataTable,
-        filterDataTable
+        filterDataTable,
+        showToast,
+        showConfirmationModal,
+        closeConfirmationModal
     };
 }

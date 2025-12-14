@@ -24,34 +24,40 @@ window.addEventListener('modulesLoaded', function () {
         }
     };
 
-    // Update progress indicator when any required field changes (real-time feedback)
-    if (formEl) {
-        formEl.addEventListener('input', function (event) {
-            // Only update progress for required fields to avoid performance issues
-            const target = event.target;
-            clearValidationErrorForField(target);
-            if (target.hasAttribute('required') || target.tagName === 'SELECT') {
-                // Debounce the update
-                if (window._progressUpdateTimeout) {
-                    clearTimeout(window._progressUpdateTimeout);
-                }
-                window._progressUpdateTimeout = setTimeout(() => {
-                    window.updateProgress();
-                }, 150);
-            }
-        });
+    // Use event delegation on body to ensure we catch events even if form is replaced or loaded late
+    document.body.addEventListener('input', function (event) {
+        const target = event.target;
+        // Only track inputs within the data-form
+        if (!target.closest('#data-form')) return;
 
-        // Also update on change events (for select dropdowns)
-        formEl.addEventListener('change', function (event) {
-            const target = event.target;
-            clearValidationErrorForField(target);
-            if (target.hasAttribute('required') || target.tagName === 'SELECT') {
-                setTimeout(() => {
-                    window.updateProgress();
-                }, 50);
+        window.isFormDirty = true; // Mark form as dirty on input
+        clearValidationErrorForField(target);
+
+        if (target.hasAttribute('required') || target.tagName === 'SELECT') {
+            // Debounce the update
+            if (window._progressUpdateTimeout) {
+                clearTimeout(window._progressUpdateTimeout);
             }
-        });
-    }
+            window._progressUpdateTimeout = setTimeout(() => {
+                window.updateProgress();
+            }, 150);
+        }
+    });
+
+    document.body.addEventListener('change', function (event) {
+        const target = event.target;
+        // Only track inputs within the data-form
+        if (!target.closest('#data-form')) return;
+
+        window.isFormDirty = true; // Mark form as dirty on change
+        clearValidationErrorForField(target);
+
+        if (target.hasAttribute('required') || target.tagName === 'SELECT') {
+            setTimeout(() => {
+                window.updateProgress();
+            }, 50);
+        }
+    });
 
     // Prevent Enter key from submitting the form, make it navigate tabs instead
     if (formEl) {
@@ -142,10 +148,23 @@ window.addEventListener('modulesLoaded', function () {
                     window.resetVisitedTabs();
                 }
 
-                alert('Data saved successfully!');
+                // Clear dirty flag as data is saved
+                window.isFormDirty = false;
+
+                const showToast = window.showToast || (window.UIModule && window.UIModule.showToast);
+                if (typeof showToast === 'function') {
+                    showToast('Data saved successfully!', 'success');
+                } else {
+                    alert('Data saved successfully!');
+                }
                 window.showMainTab('data-view');
             } else {
-                alert('Please fill all mandatory fields before submitting.');
+                const showToast = window.showToast || (window.UIModule && window.UIModule.showToast);
+                if (typeof showToast === 'function') {
+                    showToast('Please fill all mandatory fields before submitting.', 'error');
+                } else {
+                    alert('Please fill all mandatory fields before submitting.');
+                }
                 if (validation.firstInvalidTab !== null) {
                     window.showFormTab(validation.firstInvalidTab);
                     if (validation.firstInvalidInput) {
@@ -165,7 +184,7 @@ window.addEventListener('modulesLoaded', function () {
         clearBtn.addEventListener('click', function () {
             if (window.clearAllData()) {
                 window.renderDataTable();
-                alert('All data has been cleared.');
+                window.showToast('All data has been cleared.', 'info');
             }
         });
     }
@@ -175,10 +194,10 @@ window.addEventListener('modulesLoaded', function () {
         copyBtn.addEventListener('click', () => {
             const content = document.getElementById('modal-body').innerText;
             navigator.clipboard.writeText(content).then(() => {
-                alert('Copied to clipboard!');
+                window.showToast('Copied to clipboard!', 'success');
             }).catch(err => {
                 console.error('Failed to copy text: ', err);
-                alert('Failed to copy text. Please copy it manually.');
+                window.showToast('Failed to copy text. Please copy it manually.', 'error');
             });
         });
     }

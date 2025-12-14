@@ -137,6 +137,9 @@
             window.showMainTab = window.UIModule.showMainTab;
             window.renderDataTable = window.UIModule.renderDataTable;
             window.filterDataTable = window.UIModule.filterDataTable;
+            window.showToast = window.UIModule.showToast;
+            window.showConfirmationModal = window.UIModule.showConfirmationModal;
+            window.closeConfirmationModal = window.UIModule.closeConfirmationModal;
         }
 
         // AI Module functions

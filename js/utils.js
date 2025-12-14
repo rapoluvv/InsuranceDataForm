@@ -9,8 +9,8 @@
 
 // Previous policy field keys and CSS class mapping
 const PREV_POLICY_KEYS = [
-    'prev_policy_no', 'prev_branch', 'prev_plan_term', 'prev_sa', 
-    'prev_y_premium', 'prev_ab_addb', 'prev_doc', 'prev_mode', 
+    'prev_policy_no', 'prev_branch', 'prev_plan_term', 'prev_sa',
+    'prev_y_premium', 'prev_ab_addb', 'prev_doc', 'prev_mode',
     'prev_or', 'prev_m_nm', 'prev_inforce'
 ];
 
@@ -64,11 +64,11 @@ function updateConditionalVisibility(containerId, inputId, value, triggerValue =
     const container = document.getElementById(containerId);
     const input = inputId ? document.getElementById(inputId) : null;
     const show = value === triggerValue;
-    
+
     if (container) {
         container.classList.toggle('hidden', !show);
     }
-    
+
     if (input) {
         if (show) {
             input.setAttribute('required', 'required');
@@ -77,7 +77,7 @@ function updateConditionalVisibility(containerId, inputId, value, triggerValue =
             input.value = '';
         }
     }
-    
+
     return show;
 }
 
@@ -120,13 +120,13 @@ function getClassForKey(key, classMap) {
 function createFamilyMemberNode(type, data = {}, role = null, index = null) {
     const config = FAMILY_MEMBER_CONFIG[type];
     if (!config) return null;
-    
+
     const tpl = document.getElementById(config.template);
     if (!tpl) return null;
-    
+
     const node = tpl.content.firstElementChild.cloneNode(true);
     const prefix = config.prefix;
-    
+
     // Get elements
     const ageEl = node.querySelector(`.${prefix}-age`);
     const stateEl = node.querySelector(`.${prefix}-state`);
@@ -135,18 +135,18 @@ function createFamilyMemberNode(type, data = {}, role = null, index = null) {
     const diedCauseEl = node.querySelector(`.${prefix}-died-cause`);
     const deathContainer = node.querySelector(`.${config.deathContainerClass}`);
     const header = node.querySelector(`.${config.headerClass}`);
-    
+
     // Set header text
     const displayRole = role || (type === 'sibling' ? 'Sibling' : 'Child');
     if (header) header.textContent = `${displayRole}${index ? ' ' + index : ''}`;
-    
+
     // Populate data
     if (ageEl && typeof data.age !== 'undefined') ageEl.value = data.age;
     if (stateEl && data.state) stateEl.value = data.state;
     if (diedAgeEl && data.died_age) diedAgeEl.value = data.died_age;
     if (diedYearEl && data.died_year) diedYearEl.value = data.died_year;
     if (diedCauseEl && data.died_cause) diedCauseEl.value = data.died_cause;
-    
+
     // Handle death container visibility
     const deathFields = [diedAgeEl, diedYearEl, diedCauseEl];
     const showDeath = stateEl && stateEl.value === 'Dead';
@@ -154,7 +154,7 @@ function createFamilyMemberNode(type, data = {}, role = null, index = null) {
         deathContainer.classList.toggle('hidden', !showDeath);
         setRequiredIfVisible(deathFields, showDeath, false);
     }
-    
+
     // Wire up remove button
     const removeBtn = node.querySelector(`.${config.removeClass}`);
     if (removeBtn) {
@@ -166,8 +166,8 @@ function createFamilyMemberNode(type, data = {}, role = null, index = null) {
             } else if (role) {
                 // Handle siblings (num_brothers or num_sisters)
                 const roleLower = role.toLowerCase();
-                const numElId = roleLower === 'brother' ? 'num_brothers' : 
-                               (roleLower === 'sister' ? 'num_sisters' : null);
+                const numElId = roleLower === 'brother' ? 'num_brothers' :
+                    (roleLower === 'sister' ? 'num_sisters' : null);
                 if (numElId) {
                     const numEl = document.getElementById(numElId);
                     if (numEl) numEl.value = Math.max(0, (parseInt(numEl.value || '0', 10) - 1));
@@ -182,7 +182,7 @@ function createFamilyMemberNode(type, data = {}, role = null, index = null) {
             }
         });
     }
-    
+
     // Wire up state change listener
     if (stateEl) {
         stateEl.addEventListener('change', (e) => {
@@ -191,7 +191,7 @@ function createFamilyMemberNode(type, data = {}, role = null, index = null) {
             setRequiredIfVisible(deathFields, showDeathNow);
         });
     }
-    
+
     return node;
 }
 

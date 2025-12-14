@@ -256,11 +256,9 @@ function updateProgress() {
         }
 
         if (index === currentFormTabIndex) {
-            // Current active tab
+            // Current active tab - only show active state, no errors while editing
             step.classList.add('active');
-            if (hasMissingRequired) {
-                step.classList.add('has-errors');
-            }
+            // Don't show errors while user is editing - just show the active state
         } else if (visitedTabs.has(index)) {
             // Previously visited tabs - show completed or warning based on status
             if (hasMissingRequired) {
@@ -1215,7 +1213,50 @@ function loadRepeatersFromData(data = {}) {
     renumberRepeaters('Brother');
     renumberRepeaters('Sister');
     renumberRepeaters('Child');
+    renumberRepeaters('Child');
     updateDeliveryVisibility();
+}
+
+// Dirty state tracking
+window.isFormDirty = false;
+
+function resetFormState() {
+    // Reset dirty flag first to avoid triggers
+    window.isFormDirty = false;
+
+    // Reset form fields
+    const form = document.getElementById('data-form');
+    if (form) form.reset();
+
+    // Reset stepper to first step
+    showFormTab(0);
+
+    // Reset repeaters
+    clearNomineesRepeater();
+    clearPreviousPoliciesRepeater();
+
+    // Reset siblings/children repeaters
+    const bContainer = document.getElementById('brothers-repeater');
+    const sContainer = document.getElementById('sisters-repeater');
+    const cContainer = document.getElementById('children-repeater');
+    if (bContainer) bContainer.innerHTML = '';
+    if (sContainer) sContainer.innerHTML = '';
+    if (cContainer) cContainer.innerHTML = '';
+
+    // Reset editing index
+    window.editingIndex = null;
+
+    // Reset visibility states by triggering change events or manual update
+    updateMarriageDependentVisibility('');
+    updateDatingBackVisibility('');
+    updateParentDeathVisibility('father', '');
+    updateParentDeathVisibility('mother', '');
+    updateParentDeathVisibility('spouse', '');
+    updateOperationsVisibility('');
+    updateDiseasesVisibility('');
+    updatePregnancyVisibility('');
+    updateDeliveryVisibility();
+    updateCorrAddressVisibility();
 }
 
 // Correspondence Address Visibility
@@ -1289,5 +1330,6 @@ window.getRepeatersData = getRepeatersData;
 window.loadRepeatersFromData = loadRepeatersFromData;
 window.editRow = editRow;
 window.openRowDetails = openRowDetails;
+window.resetFormState = resetFormState;
 
 console.log('App module loaded');
