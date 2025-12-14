@@ -35,7 +35,7 @@ async function deriveKey(password, salt) {
         false,
         ['deriveBits', 'deriveKey']
     );
-    
+
     return window.crypto.subtle.deriveKey(
         {
             name: 'PBKDF2',
@@ -58,26 +58,26 @@ async function deriveKey(password, salt) {
  */
 async function encryptValue(text, password = DEFAULT_ENCRYPTION_PASSWORD) {
     if (!text || text === '') return text;
-    
+
     try {
         const encoder = new TextEncoder();
         const salt = window.crypto.getRandomValues(new Uint8Array(16));
         const iv = window.crypto.getRandomValues(new Uint8Array(12));
         const key = await deriveKey(password, salt);
-        
+
         const encrypted = await window.crypto.subtle.encrypt(
             { name: 'AES-GCM', iv: iv },
             key,
             encoder.encode(text)
         );
-        
+
         // Combine salt, iv, and encrypted data
         const encryptedArray = new Uint8Array(encrypted);
         const combined = new Uint8Array(salt.length + iv.length + encryptedArray.length);
         combined.set(salt, 0);
         combined.set(iv, salt.length);
         combined.set(encryptedArray, salt.length + iv.length);
-        
+
         // Convert to base64
         return btoa(String.fromCharCode(...combined));
     } catch (e) {
@@ -94,26 +94,26 @@ async function encryptValue(text, password = DEFAULT_ENCRYPTION_PASSWORD) {
  */
 async function decryptValue(encryptedText, password = DEFAULT_ENCRYPTION_PASSWORD) {
     if (!encryptedText || encryptedText === '') return encryptedText;
-    
+
     try {
         // Convert from base64
         const combined = new Uint8Array(
             atob(encryptedText).split('').map(char => char.charCodeAt(0))
         );
-        
+
         // Extract salt, iv, and encrypted data
         const salt = combined.slice(0, 16);
         const iv = combined.slice(16, 28);
         const encrypted = combined.slice(28);
-        
+
         const key = await deriveKey(password, salt);
-        
+
         const decrypted = await window.crypto.subtle.decrypt(
             { name: 'AES-GCM', iv: iv },
             key,
             encrypted
         );
-        
+
         const decoder = new TextDecoder();
         return decoder.decode(decrypted);
     } catch (e) {
@@ -129,13 +129,13 @@ async function decryptValue(encryptedText, password = DEFAULT_ENCRYPTION_PASSWOR
  */
 async function encryptSensitiveFields(dataObj) {
     const encrypted = { ...dataObj };
-    
+
     for (const field of SENSITIVE_FIELDS) {
         if (encrypted[field]) {
             encrypted[field] = await encryptValue(String(encrypted[field]));
         }
     }
-    
+
     // Encrypt sensitive fields in nested arrays
     if (Array.isArray(encrypted.nominees)) {
         encrypted.nominees = await Promise.all(encrypted.nominees.map(async (nominee) => {
@@ -149,7 +149,7 @@ async function encryptSensitiveFields(dataObj) {
             return nominee;
         }));
     }
-    
+
     return encrypted;
 }
 
@@ -160,13 +160,13 @@ async function encryptSensitiveFields(dataObj) {
  */
 async function decryptSensitiveFields(dataObj) {
     const decrypted = { ...dataObj };
-    
+
     for (const field of SENSITIVE_FIELDS) {
         if (decrypted[field]) {
             decrypted[field] = await decryptValue(String(decrypted[field]));
         }
     }
-    
+
     // Decrypt sensitive fields in nested arrays
     if (Array.isArray(decrypted.nominees)) {
         decrypted.nominees = await Promise.all(decrypted.nominees.map(async (nominee) => {
@@ -180,13 +180,13 @@ async function decryptSensitiveFields(dataObj) {
             return nominee;
         }));
     }
-    
+
     return decrypted;
 }
 
 // CSV Headers constant - defines all fields in the data model
 const CSV_HEADERS = [
-    'name_of_la', 'proposer', 'aadhaar', 'pan', 'ckyc', 'abha', 'f_name', 'm_name', 'gender', 'is_married', 'spouse', 'd_marriage', 'mobile_adhar', 'mobile', 
+    'name_of_la', 'proposer', 'aadhaar', 'pan', 'ckyc', 'abha', 'f_name', 'm_name', 'gender', 'is_married', 'spouse', 'd_marriage', 'mobile_adhar', 'mobile',
     'whatsapp', 'email', 'dob', 'birth_place', 'near_lb_age', 'residential_status',
     'corr_same_kyc', 'corr_address', 'address', 'bank_name', 'ac_type', 'ac_holder_name', 'bank_address', 'ac_no',
     'micr_code', 'ifsc_code', 'nominee_aadhaar', 'nominee', 'nominee_age', 'nominee_relation', 'appointee', 'appointee_relation', 'appointee_age',
@@ -200,7 +200,7 @@ const CSV_HEADERS = [
     'fam_brother_age', 'fam_brother_state', 'fam_brother_died_age', 'fam_brother_died_year', 'fam_brother_died_cause',
     'fam_sister_age', 'fam_sister_state', 'fam_sister_died_age', 'fam_sister_died_year', 'fam_sister_died_cause',
     'fam_child_age', 'fam_child_state', 'fam_child_died_age', 'fam_child_died_year', 'fam_child_died_cause',
-    'fam_brothers', 'fam_sisters', 'fam_children', 'height', 'weight', 'abd', 'any_operations', 'operation_details', 
+    'fam_brothers', 'fam_sisters', 'fam_children', 'height', 'weight', 'abd', 'any_operations', 'operation_details',
     'any_diseases', 'disease_details', 'are_pregnant', 'last_delivery_date', 'nominees', 'previous_policies'
 ];
 
@@ -211,14 +211,14 @@ const CSV_HEADERS = [
 async function getStoredData() {
     const data = localStorage.getItem('formData');
     if (!data) return [];
-    
+
     const parsedData = JSON.parse(data);
-    
+
     // Decrypt all records
     const decryptedData = await Promise.all(
         parsedData.map(record => decryptSensitiveFields(record))
     );
-    
+
     return decryptedData;
 }
 
@@ -242,7 +242,7 @@ async function saveData(data) {
     const encryptedData = await Promise.all(
         data.map(record => encryptSensitiveFields(record))
     );
-    
+
     localStorage.setItem('formData', JSON.stringify(encryptedData));
 }
 
@@ -291,47 +291,77 @@ async function exportDataAsJSON() {
  */
 async function importDataFromJSON(file) {
     const reader = new FileReader();
-    reader.onload = async function(e) {
+    reader.onload = async function (e) {
         try {
             const jsonData = JSON.parse(e.target.result);
 
             // Validate the JSON structure
             if (!jsonData.data || !Array.isArray(jsonData.data)) {
-                alert('Invalid file format. Please select a valid export file.');
+                if (window.UIModule && window.UIModule.showAlertModal) {
+                    window.UIModule.showAlertModal('Invalid Format', 'Invalid file format. Please select a valid export file.');
+                } else {
+                    alert('Invalid file format. Please select a valid export file.');
+                }
                 return;
             }
 
+            // Define processing function to avoid code duplication
+            const processImport = async (choice) => {
+                const existingData = await getStoredData();
+                let finalData;
+                if (choice === 'add') {
+                    finalData = [...existingData, ...jsonData.data];
+                } else {
+                    finalData = jsonData.data;
+                }
+
+                // Save the data (will be encrypted)
+                await saveData(finalData);
+
+                // Refresh the display if renderDataTable is available
+                if (typeof window.renderDataTable === 'function') {
+                    window.renderDataTable();
+                }
+
+                if (window.UIModule && window.UIModule.showAlertModal) {
+                    window.UIModule.showAlertModal('Import Successful', `Successfully imported ${jsonData.data.length} record(s).`);
+                } else {
+                    alert(`Successfully imported ${jsonData.data.length} record(s).`);
+                }
+            };
+
             // Merge with existing data or replace (user choice)
             const existingData = await getStoredData();
-            let importChoice = 'replace';
 
             if (existingData.length > 0) {
-                importChoice = confirm(
-                    `You have ${existingData.length} existing record(s).\n` +
-                    `Click OK to ADD the imported data to existing records,\n` +
-                    `or Cancel to REPLACE all existing data.`
-                ) ? 'add' : 'replace';
-            }
-
-            let finalData;
-            if (importChoice === 'add') {
-                finalData = [...existingData, ...jsonData.data];
+                if (window.UIModule && window.UIModule.showConfirmationModal) {
+                    window.UIModule.showConfirmationModal(
+                        'Import Options',
+                        `You have ${existingData.length} existing record(s).<br>Do you want to MERGE the imported data or REPLACE all existing data?`,
+                        () => processImport('add'),
+                        () => processImport('replace'),
+                        'Merge',
+                        'Replace'
+                    );
+                } else {
+                    // Fallback if UI module not loaded
+                    const choice = confirm(
+                        `You have ${existingData.length} existing record(s).\n` +
+                        `Click OK to ADD the imported data to existing records,\n` +
+                        `or Cancel to REPLACE all existing data.`
+                    ) ? 'add' : 'replace';
+                    processImport(choice);
+                }
             } else {
-                finalData = jsonData.data;
+                processImport('replace');
             }
-
-            // Save the data (will be encrypted)
-            await saveData(finalData);
-
-            // Refresh the display if renderDataTable is available
-            if (typeof window.renderDataTable === 'function') {
-                window.renderDataTable();
-            }
-
-            alert(`Successfully imported ${jsonData.data.length} record(s).`);
 
         } catch (error) {
-            alert('Error importing file: ' + error.message);
+            if (window.UIModule && window.UIModule.showAlertModal) {
+                window.UIModule.showAlertModal('Import Error', 'Error importing file: ' + error.message);
+            } else {
+                alert('Error importing file: ' + error.message);
+            }
         }
     };
 
@@ -360,11 +390,8 @@ async function deleteRow(index) {
  * Clear all data from localStorage
  */
 function clearAllData() {
-    if (confirm('Are you sure you want to delete all submitted data? This action cannot be undone.')) {
-        localStorage.removeItem('formData');
-        return true;
-    }
-    return false;
+    localStorage.removeItem('formData');
+    return true;
 }
 
 // Browser-compatible exports (works in both browser and potential Node.js environments)

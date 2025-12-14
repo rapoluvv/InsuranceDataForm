@@ -182,9 +182,26 @@ window.addEventListener('modulesLoaded', function () {
     const clearBtn = document.getElementById('clear-data');
     if (clearBtn) {
         clearBtn.addEventListener('click', function () {
-            if (window.clearAllData()) {
-                window.renderDataTable();
-                window.showToast('All data has been cleared.', 'info');
+            if (window.UIModule && window.UIModule.showConfirmationModal) {
+                window.UIModule.showConfirmationModal(
+                    'Clear All Data',
+                    'Are you sure you want to delete all submitted data? This action cannot be undone.',
+                    function () {
+                        if (window.clearAllData()) {
+                            window.renderDataTable();
+                            window.showToast('All data has been cleared.', 'info');
+                        }
+                    },
+                    null,
+                    'Clear Data',
+                    'Cancel'
+                );
+            } else if (confirm('Are you sure you want to delete all submitted data?')) {
+                // Fallback if UIModule is not loaded
+                if (window.clearAllData()) {
+                    window.renderDataTable();
+                    window.showToast('All data has been cleared.', 'info');
+                }
             }
         });
     }
