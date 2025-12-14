@@ -505,7 +505,24 @@ input[type="checkbox"] {
     color: var(--error);
 }
 
-/* Action Buttons - Gradient */
+/* Action Buttons - Gradient Utility */
+/* Shared gradient button base - use this class for gradient buttons */
+.btn-gradient {
+    background: linear-gradient(135deg, var(--primary-start), var(--primary-end)) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4) !important;
+}
+
+/* Apply gradient styles to common button selectors */
 button[type="submit"],
 .bg-blue-600,
 .bg-green-600 {
@@ -525,21 +542,27 @@ button[type="submit"]:hover,
     box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4) !important;
 }
 
+/* Secondary/Gray button */
+.btn-secondary,
 .bg-gray-600 {
     background: var(--surface-elevated) !important;
     color: var(--text-primary) !important;
     border: 1px solid var(--border) !important;
 }
 
+.btn-secondary:hover,
 .bg-gray-600:hover {
     background: var(--surface-hover) !important;
     transform: translateY(-2px);
 }
 
+/* Danger button */
+.btn-danger,
 .bg-red-600 {
     background: linear-gradient(135deg, #ef4444, #dc2626) !important;
 }
 
+/* Purple button */
 .bg-purple-600 {
     background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
 }

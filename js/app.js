@@ -62,15 +62,19 @@ function updateMarriageDependentVisibility(value) {
 }
 
 function updateDatingBackVisibility(value) {
-    const container = document.getElementById('dating-back-date-container');
-    const input = document.getElementById('dating_back_date');
-    const show = value === 'Yes';
-    if (container) {
-        if (show) container.classList.remove('hidden'); else container.classList.add('hidden');
-    }
-    if (input) {
-        if (show) input.setAttribute('required', 'required'); else input.removeAttribute('required');
-        if (!show) input.value = '';
+    // Uses shared utility from utils.js
+    if (typeof window.updateConditionalVisibility === 'function') {
+        window.updateConditionalVisibility('dating-back-date-container', 'dating_back_date', value);
+    } else {
+        // Fallback for when utils hasn't loaded yet
+        const container = document.getElementById('dating-back-date-container');
+        const input = document.getElementById('dating_back_date');
+        const show = value === 'Yes';
+        if (container) container.classList.toggle('hidden', !show);
+        if (input) {
+            if (show) input.setAttribute('required', 'required');
+            else { input.removeAttribute('required'); input.value = ''; }
+        }
     }
 }
 
@@ -94,24 +98,36 @@ function updateParentDeathVisibility(member, value) {
 }
 
 function updateOperationsVisibility(value) {
-    const container = document.getElementById('operation-details-container');
-    const input = document.getElementById('operation_details');
-    const show = value === 'Yes';
-    if (container) container.classList.toggle('hidden', !show);
-    if (input) {
-        if (show) input.setAttribute('required', 'required'); else input.removeAttribute('required');
-        if (!show) input.value = '';
+    // Uses shared utility from utils.js
+    if (typeof window.updateConditionalVisibility === 'function') {
+        window.updateConditionalVisibility('operation-details-container', 'operation_details', value);
+    } else {
+        // Fallback
+        const container = document.getElementById('operation-details-container');
+        const input = document.getElementById('operation_details');
+        const show = value === 'Yes';
+        if (container) container.classList.toggle('hidden', !show);
+        if (input) {
+            if (show) input.setAttribute('required', 'required');
+            else { input.removeAttribute('required'); input.value = ''; }
+        }
     }
 }
 
 function updateDiseasesVisibility(value) {
-    const container = document.getElementById('disease-details-container');
-    const input = document.getElementById('disease_details');
-    const show = value === 'Yes';
-    if (container) container.classList.toggle('hidden', !show);
-    if (input) {
-        if (show) input.setAttribute('required', 'required'); else input.removeAttribute('required');
-        if (!show) input.value = '';
+    // Uses shared utility from utils.js
+    if (typeof window.updateConditionalVisibility === 'function') {
+        window.updateConditionalVisibility('disease-details-container', 'disease_details', value);
+    } else {
+        // Fallback
+        const container = document.getElementById('disease-details-container');
+        const input = document.getElementById('disease_details');
+        const show = value === 'Yes';
+        if (container) container.classList.toggle('hidden', !show);
+        if (input) {
+            if (show) input.setAttribute('required', 'required');
+            else { input.removeAttribute('required'); input.value = ''; }
+        }
     }
 }
 
@@ -908,22 +924,11 @@ function createPreviousPolicyNode(data = {}) {
     const tpl = document.getElementById('previous-policy-template');
     if (!tpl) return null;
     const node = tpl.content.firstElementChild.cloneNode(true);
-    const map = ['prev_policy_no', 'prev_branch', 'prev_plan_term', 'prev_sa', 'prev_y_premium', 'prev_ab_addb', 'prev_doc', 'prev_mode', 'prev_or', 'prev_m_nm', 'prev_inforce'];
-    const classMap = {
-        prev_policy_no: 'prev-policy-no',
-        prev_branch: 'prev-branch',
-        prev_plan_term: 'prev-plan-term',
-        prev_sa: 'prev-sa',
-        prev_y_premium: 'prev-y-premium',
-        prev_ab_addb: 'prev-ab-addb',
-        prev_doc: 'prev-doc',
-        prev_mode: 'prev-mode',
-        prev_or: 'prev-or',
-        prev_m_nm: 'prev-m-nm',
-        prev_inforce: 'prev-inforce'
-    };
-    map.forEach(k => {
-        const cls = classMap[k] || k.replace(/_/g, '-');
+    // Use shared constants from utils.js if available
+    const keys = window.PREV_POLICY_KEYS || ['prev_policy_no', 'prev_branch', 'prev_plan_term', 'prev_sa', 'prev_y_premium', 'prev_ab_addb', 'prev_doc', 'prev_mode', 'prev_or', 'prev_m_nm', 'prev_inforce'];
+    const classMap = window.PREV_POLICY_CLASS_MAP || {};
+    keys.forEach(k => {
+        const cls = window.getClassForKey ? window.getClassForKey(k, classMap) : (classMap[k] || k.replace(/_/g, '-'));
         const el = node.querySelector('.' + cls);
         if (el && data[k] !== undefined && data[k] !== null) el.value = data[k];
     });
@@ -938,24 +943,13 @@ function getPreviousPoliciesFromRepeater() {
     const container = document.getElementById('previous-policies-repeater');
     if (!container) return [];
     const items = Array.from(container.querySelectorAll('.previous-policy-item'));
+    // Use shared constants from utils.js if available
+    const keys = window.PREV_POLICY_KEYS || ['prev_policy_no', 'prev_branch', 'prev_plan_term', 'prev_sa', 'prev_y_premium', 'prev_ab_addb', 'prev_doc', 'prev_mode', 'prev_or', 'prev_m_nm', 'prev_inforce'];
+    const classMap = window.PREV_POLICY_CLASS_MAP || {};
     return items.map(item => {
         const obj = {};
-        const keys = ['prev_policy_no', 'prev_branch', 'prev_plan_term', 'prev_sa', 'prev_y_premium', 'prev_ab_addb', 'prev_doc', 'prev_mode', 'prev_or', 'prev_m_nm', 'prev_inforce'];
-        const classMap = {
-            prev_policy_no: 'prev-policy-no',
-            prev_branch: 'prev-branch',
-            prev_plan_term: 'prev-plan-term',
-            prev_sa: 'prev-sa',
-            prev_y_premium: 'prev-y-premium',
-            prev_ab_addb: 'prev-ab-addb',
-            prev_doc: 'prev-doc',
-            prev_mode: 'prev-mode',
-            prev_or: 'prev-or',
-            prev_m_nm: 'prev-m-nm',
-            prev_inforce: 'prev-inforce'
-        };
         keys.forEach(k => {
-            const cls = classMap[k] || k.replace(/_/g, '-');
+            const cls = window.getClassForKey ? window.getClassForKey(k, classMap) : (classMap[k] || k.replace(/_/g, '-'));
             const el = item.querySelector('.' + cls);
             obj[k] = el ? el.value : '';
         });
@@ -979,7 +973,13 @@ function loadPreviousPoliciesIntoRepeater(list) {
 }
 
 // Siblings & Children Repeater Functions
+// Using shared createFamilyMemberNode from utils.js when available
 function createSiblingNode(data = {}, role = 'Sibling', index = null) {
+    // Use shared utility from utils.js if available
+    if (typeof window.createFamilyMemberNode === 'function') {
+        return window.createFamilyMemberNode('sibling', data, role, index);
+    }
+    // Fallback implementation for when utils hasn't loaded yet
     const tpl = document.getElementById('sibling-template');
     if (!tpl) return null;
     const node = tpl.content.firstElementChild.cloneNode(true);
@@ -989,16 +989,13 @@ function createSiblingNode(data = {}, role = 'Sibling', index = null) {
     const diedYearEl = node.querySelector('.sibling-died-year');
     const diedCauseEl = node.querySelector('.sibling-died-cause');
     const deathContainer = node.querySelector('.sibling-death-container');
-
     const header = node.querySelector('.sibling-header');
     if (header) header.textContent = `${role}${index ? ' ' + index : ''}`;
-
     if (ageEl && typeof data.age !== 'undefined') ageEl.value = data.age;
     if (stateEl && data.state) stateEl.value = data.state;
     if (diedAgeEl && data.died_age) diedAgeEl.value = data.died_age;
     if (diedYearEl && data.died_year) diedYearEl.value = data.died_year;
     if (diedCauseEl && data.died_cause) diedCauseEl.value = data.died_cause;
-
     const show = stateEl && stateEl.value === 'Dead';
     if (deathContainer) {
         deathContainer.classList.toggle('hidden', !show);
@@ -1008,7 +1005,6 @@ function createSiblingNode(data = {}, role = 'Sibling', index = null) {
             else el.removeAttribute('required');
         });
     }
-
     const removeBtn = node.querySelector('.remove-sibling');
     if (removeBtn) {
         removeBtn.addEventListener('click', () => {
@@ -1018,7 +1014,6 @@ function createSiblingNode(data = {}, role = 'Sibling', index = null) {
             renumberRepeaters(role);
         });
     }
-
     if (stateEl) {
         stateEl.addEventListener('change', (e) => {
             const show = e.target.value === 'Dead';
@@ -1026,10 +1021,7 @@ function createSiblingNode(data = {}, role = 'Sibling', index = null) {
             [diedAgeEl, diedYearEl, diedCauseEl].forEach(el => {
                 if (!el) return;
                 if (show) el.setAttribute('required', 'required');
-                else {
-                    el.removeAttribute('required');
-                    el.value = '';
-                }
+                else { el.removeAttribute('required'); el.value = ''; }
             });
         });
     }
@@ -1037,6 +1029,11 @@ function createSiblingNode(data = {}, role = 'Sibling', index = null) {
 }
 
 function createChildNode(data = {}, role = 'Child', index = null) {
+    // Use shared utility from utils.js if available
+    if (typeof window.createFamilyMemberNode === 'function') {
+        return window.createFamilyMemberNode('child', data, role, index);
+    }
+    // Fallback implementation for when utils hasn't loaded yet
     const tpl = document.getElementById('child-template');
     if (!tpl) return null;
     const node = tpl.content.firstElementChild.cloneNode(true);
@@ -1046,16 +1043,13 @@ function createChildNode(data = {}, role = 'Child', index = null) {
     const diedYearEl = node.querySelector('.child-died-year');
     const diedCauseEl = node.querySelector('.child-died-cause');
     const deathContainer = node.querySelector('.child-death-container');
-
     const header = node.querySelector('.child-header');
     if (header) header.textContent = `${role}${index ? ' ' + index : ''}`;
-
     if (ageEl && typeof data.age !== 'undefined') ageEl.value = data.age;
     if (stateEl && data.state) stateEl.value = data.state;
     if (diedAgeEl && data.died_age) diedAgeEl.value = data.died_age;
     if (diedYearEl && data.died_year) diedYearEl.value = data.died_year;
     if (diedCauseEl && data.died_cause) diedCauseEl.value = data.died_cause;
-
     const show = stateEl && stateEl.value === 'Dead';
     if (deathContainer) {
         deathContainer.classList.toggle('hidden', !show);
@@ -1065,7 +1059,6 @@ function createChildNode(data = {}, role = 'Child', index = null) {
             else el.removeAttribute('required');
         });
     }
-
     const removeBtn = node.querySelector('.remove-child');
     if (removeBtn) {
         removeBtn.addEventListener('click', () => {
@@ -1076,7 +1069,6 @@ function createChildNode(data = {}, role = 'Child', index = null) {
             updateDeliveryVisibility();
         });
     }
-
     if (stateEl) {
         stateEl.addEventListener('change', (e) => {
             const show = e.target.value === 'Dead';
@@ -1084,10 +1076,7 @@ function createChildNode(data = {}, role = 'Child', index = null) {
             [diedAgeEl, diedYearEl, diedCauseEl].forEach(el => {
                 if (!el) return;
                 if (show) el.setAttribute('required', 'required');
-                else {
-                    el.removeAttribute('required');
-                    el.value = '';
-                }
+                else { el.removeAttribute('required'); el.value = ''; }
             });
         });
     }
