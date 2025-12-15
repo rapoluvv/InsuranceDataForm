@@ -776,9 +776,16 @@
                         </div>
                         <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)"
                                 class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr;
-                                Previous</button><button type="submit"
-                                class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition duration-300 shadow-lg">Submit
-                                Data</button></div>
+                                Previous</button>
+                            <div class="flex space-x-4">
+                                <button type="button" id="save-draft-btn"
+                                    class="bg-yellow-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-yellow-700 transition duration-300 shadow-lg">Save
+                                    Draft</button>
+                                <button type="submit"
+                                    class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition duration-300 shadow-lg">Submit
+                                    Data</button>
+                            </div>
+                        </div>
 
                     </div>
                 </form>
@@ -834,6 +841,12 @@
                     <div class="mb-4">
                         <input type="text" id="search-input" placeholder="Search by name or policy number..."
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <!-- Subtabs for Drafts/Submitted -->
+                    <div class="flex space-x-4 mb-4 border-b border-gray-200">
+                        <button id="subtab-submitted" class="py-2 px-4 text-sm font-medium text-blue-600 border-b-2 border-blue-600 focus:outline-none" onclick="UIModule.switchViewSubtab('submitted')">Submitted Data</button>
+                        <button id="subtab-drafts" class="py-2 px-4 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none" onclick="UIModule.switchViewSubtab('drafts')">Drafts</button>
                     </div>
 
                     <div id="data-table-container" class="overflow-x-auto">

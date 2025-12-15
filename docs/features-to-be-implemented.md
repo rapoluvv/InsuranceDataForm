@@ -2,7 +2,7 @@
 
 This document breaks each high-level improvement into focused subsections with concise implementation notes, acceptance criteria, and additional suggestions where useful.
 
-## 1. Animate data-tab changes & motion preferences
+## 1. Animate data-tab changes & motion preferences (Not implementing any more)
 
 Problem: view changes are abrupt and provide limited feedback.
 

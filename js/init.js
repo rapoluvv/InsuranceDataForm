@@ -141,6 +141,10 @@ window.addEventListener('modulesLoaded', function () {
                     entry.fam_children = [];
                 }
 
+                // Set status to submitted
+                entry.status = 'submitted';
+                entry.lastEdited = new Date().toISOString();
+
                 const allData = await window.getStoredData();
                 if (window.editingIndex !== null && window.editingIndex >= 0 && window.editingIndex < allData.length) {
                     allData[window.editingIndex] = entry;
@@ -187,6 +191,11 @@ window.addEventListener('modulesLoaded', function () {
     }
 
     // Set up other event listeners
+    const saveDraftBtn = document.getElementById('save-draft-btn');
+    if (saveDraftBtn) {
+        saveDraftBtn.addEventListener('click', window.handleSaveDraft);
+    }
+
     const clearBtn = document.getElementById('clear-data');
     if (clearBtn) {
         clearBtn.addEventListener('click', function () {
