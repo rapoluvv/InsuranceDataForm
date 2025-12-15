@@ -2,6 +2,7 @@
  * UI Module - Handles all UI component functions
  * Manages modals, data tables, repeaters, form tabs, and visibility logic
  */
+const MAIN_TAB_STORAGE_KEY = 'insurance-data-form-active-main-tab';
 
 /**
  * Open a modal with specified title
@@ -185,6 +186,21 @@ function scrollElementToTop(el) {
     } catch (e) { /* ignore */ }
 }
 
+function persistMainTabPreference(tabId) {
+    if (tabId !== 'form-view' && tabId !== 'data-view') return;
+    try {
+        localStorage.setItem(MAIN_TAB_STORAGE_KEY, tabId);
+    } catch (e) { /* ignore */ }
+}
+
+function getPersistedMainTab() {
+    try {
+        return localStorage.getItem(MAIN_TAB_STORAGE_KEY);
+    } catch (e) {
+        return null;
+    }
+}
+
 /**
  * Show a specific main tab (form-view or data-view)
  * @param {string} tabId - ID of the tab to show
@@ -240,6 +256,7 @@ function executeTabSwitch(tabId) {
     document.getElementById('data-view').classList.toggle('hidden', tabId !== 'data-view');
     document.getElementById('form-tab-button').classList.toggle('active', tabId === 'form-view');
     document.getElementById('view-tab-button').classList.toggle('active', tabId === 'data-view');
+    persistMainTabPreference(tabId);
     if (tabId === 'data-view' && typeof window.renderDataTable === 'function') {
         window.renderDataTable();
     }
@@ -501,7 +518,8 @@ if (typeof module !== 'undefined' && module.exports) {
         showToast,
         showConfirmationModal,
         showAlertModal,
-        closeConfirmationModal
+        closeConfirmationModal,
+        getPersistedMainTab
     };
 } else {
     window.UIModule = {
@@ -519,6 +537,7 @@ if (typeof module !== 'undefined' && module.exports) {
         showToast,
         showConfirmationModal,
         showAlertModal,
-        closeConfirmationModal
+        closeConfirmationModal,
+        getPersistedMainTab
     };
 }
