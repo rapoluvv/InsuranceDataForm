@@ -11,6 +11,14 @@ window.addEventListener('modulesLoaded', function () {
     // Initialize form tabs
     window.initializeFormTabs();
 
+    const persistedTab = (window.UIModule && typeof window.UIModule.getPersistedMainTab === 'function')
+        ? window.UIModule.getPersistedMainTab()
+        : null;
+    const initialMainTab = (persistedTab === 'data-view') ? 'data-view' : 'form-view';
+    if (typeof window.showMainTab === 'function') {
+        window.showMainTab(initialMainTab);
+    }
+
     // Disable HTML5 validation to use custom validation
     const formEl = document.getElementById('data-form');
     if (formEl) formEl.noValidate = true;

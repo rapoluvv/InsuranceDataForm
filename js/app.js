@@ -281,6 +281,7 @@ function showFormTab(tabIndex) {
     try {
         if (typeof window.scrollElementToTop === 'function') {
             window.scrollElementToTop(formTabPanels[tabIndex]);
+            window.scrollElementToTop();
         }
     } catch (e) { /* ignore */ }
 }
