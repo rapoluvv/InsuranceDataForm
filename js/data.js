@@ -375,10 +375,6 @@ async function importDataFromJSON(file) {
 async function deleteRow(index) {
     const allData = await getStoredData();
     if (!allData[index]) {
-        alert('Row not found.');
-        return false;
-    }
-    if (!confirm('Are you sure you want to delete this row? This action cannot be undone.')) {
         return false;
     }
     allData.splice(index, 1);
