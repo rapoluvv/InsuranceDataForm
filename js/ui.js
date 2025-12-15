@@ -220,6 +220,22 @@ function showMainTab(tabId) {
 }
 
 function executeTabSwitch(tabId) {
+    if (tabId === 'data-view') {
+        try {
+            if (typeof window.resetVisitedTabs === 'function') {
+                window.resetVisitedTabs();
+            }
+            if (typeof window.showFormTab === 'function') {
+                window.showFormTab(0);
+            } else if (typeof window.updateProgress === 'function') {
+                window.currentFormTabIndex = 0;
+                window.updateProgress();
+            }
+        } catch (e) {
+            console.warn('Failed to reset progress indicators before switching tabs', e);
+        }
+    }
+
     document.getElementById('form-view').classList.toggle('hidden', tabId !== 'form-view');
     document.getElementById('data-view').classList.toggle('hidden', tabId !== 'data-view');
     document.getElementById('form-tab-button').classList.toggle('active', tabId === 'form-view');
