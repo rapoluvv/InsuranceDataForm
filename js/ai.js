@@ -8,8 +8,8 @@
 // RECOMMENDATION: For production deployment, implement a server-side proxy
 // to handle AI API calls and protect the API key from exposure.
 // Current implementation is suitable for development/demo purposes only.
-const API_KEY = "AIzaSyBaH3Um6fbT8zxMoiTF4lyNFhn-HWzC_RQ";
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+const API_KEY = "AIzaSyDIXLGSzixVfMbgvq-kwuFPnGmkXj-UODM";
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
 /**
  * Call Gemini AI API with retry logic

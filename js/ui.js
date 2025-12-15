@@ -220,6 +220,22 @@ function showMainTab(tabId) {
 }
 
 function executeTabSwitch(tabId) {
+    if (tabId === 'data-view') {
+        try {
+            if (typeof window.resetVisitedTabs === 'function') {
+                window.resetVisitedTabs();
+            }
+            if (typeof window.showFormTab === 'function') {
+                window.showFormTab(0);
+            } else if (typeof window.updateProgress === 'function') {
+                window.currentFormTabIndex = 0;
+                window.updateProgress();
+            }
+        } catch (e) {
+            console.warn('Failed to reset progress indicators before switching tabs', e);
+        }
+    }
+
     document.getElementById('form-view').classList.toggle('hidden', tabId !== 'form-view');
     document.getElementById('data-view').classList.toggle('hidden', tabId !== 'data-view');
     document.getElementById('form-tab-button').classList.toggle('active', tabId === 'form-view');
@@ -314,6 +330,34 @@ function showAlertModal(title, message, onOk) {
     document.body.classList.add('overflow-hidden');
 }
 
+function handleRowDelete(index) {
+    if (!window.DataModule || typeof window.DataModule.deleteRow !== 'function') {
+        showAlertModal('Deletion Error', 'Unable to delete the record right now. Please try again later.');
+        return;
+    }
+
+    showConfirmationModal(
+        'Delete Record',
+        'Are you sure you want to delete this record? This action cannot be undone.',
+        async () => {
+            try {
+                const deleted = await window.DataModule.deleteRow(index);
+                if (deleted) {
+                    executeTabSwitch('data-view');
+                } else {
+                    showAlertModal('Deletion Failed', 'The record could not be found or may already be deleted.');
+                }
+            } catch (error) {
+                console.error('Row deletion error', error);
+                showAlertModal('Deletion Error', 'Unable to delete the record right now. Please try again later.');
+            }
+        },
+        null,
+        'Delete',
+        'Cancel'
+    );
+}
+
 /**
  * Close the confirmation modal
  */
@@ -363,7 +407,7 @@ async function renderDataTable() {
         });
         tableHTML += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 space-x-2">
             <button onclick="event.stopPropagation(); generateSummary(${index})" class="text-blue-600 hover:text-blue-800 font-semibold">✨</button>
-            <button onclick="event.stopPropagation(); deleteRow(${index})" title="Delete" aria-label="Delete" class="text-red-600 hover:text-red-800 font-semibold p-2">🗑️</button>
+            <button onclick="event.stopPropagation(); handleRowDelete(${index})" title="Delete" aria-label="Delete" class="text-red-600 hover:text-red-800 font-semibold p-2">🗑️</button>
         </td>`;
         tableHTML += `</tr>`;
     });
