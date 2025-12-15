@@ -218,7 +218,7 @@ function showMainTab(tabId) {
             isEditing ? "Cancel Edit?" : "Unsaved Changes",
             message,
             function () {
-                // On Confirm
+                // On Confirm (Discard)
                 if (typeof window.resetFormState === 'function') {
                     window.resetFormState();
                 }
@@ -227,6 +227,23 @@ function showMainTab(tabId) {
             },
             function () {
                 // On Cancel - do nothing, stay on form
+            },
+            "Discard Changes", // Confirm button text
+            "Cancel", // Cancel button text
+            "Save Draft", // Extra button text
+            function() {
+                // On Save Draft
+                if (typeof window.handleSaveDraft === 'function') {
+                    window.handleSaveDraft().then((result) => {
+                        // Only switch tab if save was successful
+                        if (result && result.success) {
+                            executeTabSwitch(tabId);
+                            if (typeof switchViewSubtab === 'function') {
+                                switchViewSubtab('drafts');
+                            }
+                        }
+                    });
+                }
             }
         );
         return;
@@ -273,13 +290,29 @@ function executeTabSwitch(tabId) {
  * @param {Function} onCancel - Callback when user clicks Cancel
  * @param {string} confirmText - Text for confirm button (default: Confirm)
  * @param {string} cancelText - Text for cancel button (default: Cancel)
+ * @param {string} extraText - Text for extra button (optional)
+ * @param {Function} onExtra - Callback for extra button (optional)
  */
-function showConfirmationModal(title, message, onConfirm, onCancel, confirmText = 'Confirm', cancelText = 'Cancel') {
+function showConfirmationModal(title, message, onConfirm, onCancel, confirmText = 'Confirm', cancelText = 'Cancel', extraText = null, onExtra = null) {
     const modal = document.getElementById('confirmation-modal');
     const titleEl = document.getElementById('confirm-modal-title');
     const bodyEl = document.getElementById('confirm-modal-body');
     const okBtn = document.getElementById('confirm-ok-btn');
     const cancelBtn = document.getElementById('confirm-cancel-btn');
+    
+    // Check if extra button exists, if not create it
+    let extraBtn = document.getElementById('confirm-extra-btn');
+    if (!extraBtn && okBtn) {
+        extraBtn = document.createElement('button');
+        extraBtn.id = 'confirm-extra-btn';
+        extraBtn.className = 'px-4 py-2 bg-yellow-600 text-white rounded font-semibold hover:bg-yellow-700 transition duration-200 shadow-lg mr-3';
+        // Insert before cancel button (which is usually first in DOM order if flex-row-reverse, or check layout)
+        // Layout is: Cancel | Confirm. We want: Cancel | Save Draft | Confirm
+        // Or: Save Draft | Cancel | Confirm
+        // The HTML is: <div class="flex justify-end space-x-3"> <button id="confirm-cancel-btn"> <button id="confirm-ok-btn">
+        // So inserting before okBtn puts it in the middle.
+        okBtn.parentNode.insertBefore(extraBtn, okBtn);
+    }
 
     if (!modal) return;
 
@@ -290,12 +323,29 @@ function showConfirmationModal(title, message, onConfirm, onCancel, confirmText 
         cancelBtn.textContent = cancelText;
         cancelBtn.classList.remove('hidden'); // Ensure visible
     }
+    
+    if (extraText && extraBtn) {
+        extraBtn.textContent = extraText;
+        extraBtn.classList.remove('hidden');
+    } else if (extraBtn) {
+        extraBtn.classList.add('hidden');
+    }
 
     // Clone buttons to strip old event listeners
     const newOkBtn = okBtn.cloneNode(true);
     const newCancelBtn = cancelBtn.cloneNode(true);
     okBtn.parentNode.replaceChild(newOkBtn, okBtn);
     cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    
+    if (extraBtn) {
+        const newExtraBtn = extraBtn.cloneNode(true);
+        extraBtn.parentNode.replaceChild(newExtraBtn, extraBtn);
+        
+        newExtraBtn.onclick = function() {
+            closeConfirmationModal();
+            if (typeof onExtra === 'function') onExtra();
+        };
+    }
 
     newOkBtn.onclick = function () {
         closeConfirmationModal();

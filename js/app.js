@@ -1343,20 +1343,10 @@ async function handleSaveDraft() {
 
     // Save draft
     // If we are editing a submitted record, editingIndex points to it.
-    // If we save as draft, do we overwrite the submitted record?
-    // Or create a new draft?
-    // If status is 'submitted', we should probably create a new draft (copy).
-    // If status is 'draft', we update it.
+    // We pass this index to saveDraft. The data module will handle the status change to 'draft'.
+    // This effectively moves the record from 'submitted' to 'draft'.
     
-    // Check current status of editingIndex
-    let indexToUpdate = window.editingIndex;
-    if (indexToUpdate !== null) {
-        const allData = await window.DataModule.getStoredData();
-        if (allData[indexToUpdate] && allData[indexToUpdate].status !== 'draft') {
-            // If editing a submitted record, save as new draft
-            indexToUpdate = null;
-        }
-    }
+    const indexToUpdate = window.editingIndex;
 
     const result = await window.DataModule.saveDraft(entry, indexToUpdate);
     
@@ -1379,6 +1369,8 @@ async function handleSaveDraft() {
             alert(result.message);
         }
     }
+    
+    return result;
 }
 
 // Expose functions globally

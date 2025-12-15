@@ -394,10 +394,21 @@ async function saveDraft(draftData, index = null) {
     // Check if we are updating an existing record
     const isUpdate = index !== null && index >= 0 && index < allData.length;
     
-    // If creating new draft, check limit
-    if (!isUpdate) {
-        const draftCount = allData.filter(item => item.status === 'draft').length;
-        if (draftCount >= 5) {
+    // Calculate current draft count
+    const currentDraftCount = allData.filter(item => item.status === 'draft').length;
+    
+    // Determine if we are adding a NEW draft (either new record or converting submitted to draft)
+    let isNewDraft = true;
+    if (isUpdate) {
+        // If updating, check if it was already a draft
+        if (allData[index].status === 'draft') {
+            isNewDraft = false;
+        }
+    }
+    
+    // Check limit if we are adding a new draft
+    if (isNewDraft) {
+        if (currentDraftCount >= 5) {
             return { success: false, message: 'Draft limit reached (max 5). Please submit or delete existing drafts.' };
         }
     }
