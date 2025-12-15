@@ -1296,8 +1296,86 @@ function resetVisitedTabs() {
     visitedTabs.add(0); // First tab is always visited by default
 }
 
+// Handle manual draft save
+async function handleSaveDraft() {
+    const form = document.getElementById('data-form');
+    if (!form) return;
+
+    // Sanitize income fields
+    ['a_income', 'ly_income1', 'ly_income2', 'ly_income3', 'husband_annual_income'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            const raw = window.stripFormatting(el.value);
+            el.value = raw;
+        }
+    });
+
+    const formData = new FormData(form);
+
+    // Handle checkbox
+    try {
+        const corrCheckboxEl = document.getElementById('corr_same_kyc');
+        if (corrCheckboxEl) formData.set('corr_same_kyc', corrCheckboxEl.checked ? 'true' : 'false');
+    } catch (e) { /* ignore */ }
+
+    const entry = {};
+    window.CSV_HEADERS.forEach(header => entry[header] = formData.get(header));
+
+    // Collect repeaters
+    try {
+        entry.nominees = window.getNomineesFromRepeater();
+    } catch (e) { entry.nominees = []; }
+
+    try {
+        entry.previous_policies = window.getPreviousPoliciesFromRepeater();
+    } catch (e) { entry.previous_policies = []; }
+
+    try {
+        const repData = window.getRepeatersData();
+        entry.fam_brothers = repData.brothers;
+        entry.fam_sisters = repData.sisters;
+        entry.fam_children = repData.children;
+    } catch (e) {
+        entry.fam_brothers = [];
+        entry.fam_sisters = [];
+        entry.fam_children = [];
+    }
+
+    // Save draft
+    // If we are editing a submitted record, editingIndex points to it.
+    // We pass this index to saveDraft. The data module will handle the status change to 'draft'.
+    // This effectively moves the record from 'submitted' to 'draft'.
+    
+    const indexToUpdate = window.editingIndex;
+
+    const result = await window.DataModule.saveDraft(entry, indexToUpdate);
+    
+    const showToast = window.showToast || (window.UIModule && window.UIModule.showToast);
+    
+    if (result.success) {
+        if (typeof showToast === 'function') {
+            showToast(result.message, 'success');
+        } else {
+            alert(result.message);
+        }
+        
+        // Reset form and state
+        window.resetFormState();
+        
+    } else {
+        if (typeof showToast === 'function') {
+            showToast(result.message, 'error');
+        } else {
+            alert(result.message);
+        }
+    }
+    
+    return result;
+}
+
 // Expose functions globally
 window.currentFormTabIndex = currentFormTabIndex;
+window.handleSaveDraft = handleSaveDraft;
 window.editingIndex = editingIndex;
 window.visitedTabs = visitedTabs;
 window.resetVisitedTabs = resetVisitedTabs;

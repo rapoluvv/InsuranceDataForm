@@ -218,7 +218,7 @@ function showMainTab(tabId) {
             isEditing ? "Cancel Edit?" : "Unsaved Changes",
             message,
             function () {
-                // On Confirm
+                // On Confirm (Discard)
                 if (typeof window.resetFormState === 'function') {
                     window.resetFormState();
                 }
@@ -227,6 +227,23 @@ function showMainTab(tabId) {
             },
             function () {
                 // On Cancel - do nothing, stay on form
+            },
+            "Discard Changes", // Confirm button text
+            "Cancel", // Cancel button text
+            "Save Draft", // Extra button text
+            function() {
+                // On Save Draft
+                if (typeof window.handleSaveDraft === 'function') {
+                    window.handleSaveDraft().then((result) => {
+                        // Only switch tab if save was successful
+                        if (result && result.success) {
+                            executeTabSwitch(tabId);
+                            if (typeof switchViewSubtab === 'function') {
+                                switchViewSubtab('drafts');
+                            }
+                        }
+                    });
+                }
             }
         );
         return;
@@ -273,13 +290,29 @@ function executeTabSwitch(tabId) {
  * @param {Function} onCancel - Callback when user clicks Cancel
  * @param {string} confirmText - Text for confirm button (default: Confirm)
  * @param {string} cancelText - Text for cancel button (default: Cancel)
+ * @param {string} extraText - Text for extra button (optional)
+ * @param {Function} onExtra - Callback for extra button (optional)
  */
-function showConfirmationModal(title, message, onConfirm, onCancel, confirmText = 'Confirm', cancelText = 'Cancel') {
+function showConfirmationModal(title, message, onConfirm, onCancel, confirmText = 'Confirm', cancelText = 'Cancel', extraText = null, onExtra = null) {
     const modal = document.getElementById('confirmation-modal');
     const titleEl = document.getElementById('confirm-modal-title');
     const bodyEl = document.getElementById('confirm-modal-body');
     const okBtn = document.getElementById('confirm-ok-btn');
     const cancelBtn = document.getElementById('confirm-cancel-btn');
+    
+    // Check if extra button exists, if not create it
+    let extraBtn = document.getElementById('confirm-extra-btn');
+    if (!extraBtn && okBtn) {
+        extraBtn = document.createElement('button');
+        extraBtn.id = 'confirm-extra-btn';
+        extraBtn.className = 'px-4 py-2 bg-yellow-600 text-white rounded font-semibold hover:bg-yellow-700 transition duration-200 shadow-lg mr-3';
+        // Insert before cancel button (which is usually first in DOM order if flex-row-reverse, or check layout)
+        // Layout is: Cancel | Confirm. We want: Cancel | Save Draft | Confirm
+        // Or: Save Draft | Cancel | Confirm
+        // The HTML is: <div class="flex justify-end space-x-3"> <button id="confirm-cancel-btn"> <button id="confirm-ok-btn">
+        // So inserting before okBtn puts it in the middle.
+        okBtn.parentNode.insertBefore(extraBtn, okBtn);
+    }
 
     if (!modal) return;
 
@@ -290,12 +323,29 @@ function showConfirmationModal(title, message, onConfirm, onCancel, confirmText 
         cancelBtn.textContent = cancelText;
         cancelBtn.classList.remove('hidden'); // Ensure visible
     }
+    
+    if (extraText && extraBtn) {
+        extraBtn.textContent = extraText;
+        extraBtn.classList.remove('hidden');
+    } else if (extraBtn) {
+        extraBtn.classList.add('hidden');
+    }
 
     // Clone buttons to strip old event listeners
     const newOkBtn = okBtn.cloneNode(true);
     const newCancelBtn = cancelBtn.cloneNode(true);
     okBtn.parentNode.replaceChild(newOkBtn, okBtn);
     cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    
+    if (extraBtn) {
+        const newExtraBtn = extraBtn.cloneNode(true);
+        extraBtn.parentNode.replaceChild(newExtraBtn, extraBtn);
+        
+        newExtraBtn.onclick = function() {
+            closeConfirmationModal();
+            if (typeof onExtra === 'function') onExtra();
+        };
+    }
 
     newOkBtn.onclick = function () {
         closeConfirmationModal();
@@ -386,6 +436,38 @@ function closeConfirmationModal() {
     }
 }
 
+let currentViewSubtab = 'submitted';
+
+/**
+ * Switch between Submitted and Drafts view
+ * @param {string} tab - 'submitted' or 'drafts'
+ */
+function switchViewSubtab(tab) {
+    currentViewSubtab = tab;
+    
+    // Update UI
+    const submittedBtn = document.getElementById('subtab-submitted');
+    const draftsBtn = document.getElementById('subtab-drafts');
+    
+    if (submittedBtn && draftsBtn) {
+        if (tab === 'submitted') {
+            submittedBtn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            submittedBtn.classList.remove('text-gray-500', 'hover:text-gray-700');
+            
+            draftsBtn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+            draftsBtn.classList.add('text-gray-500', 'hover:text-gray-700');
+        } else {
+            draftsBtn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            draftsBtn.classList.remove('text-gray-500', 'hover:text-gray-700');
+            
+            submittedBtn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+            submittedBtn.classList.add('text-gray-500', 'hover:text-gray-700');
+        }
+    }
+    
+    renderDataTable();
+}
+
 /**
  * Render the data table with all saved records
  */
@@ -399,8 +481,19 @@ async function renderDataTable() {
 
     if (!tableContainer) return;
 
-    if (allData.length === 0) {
-        tableContainer.innerHTML = `<p class="text-center text-gray-500 mt-8">No data has been submitted yet.</p>`;
+    // Filter data based on current subtab
+    const filteredData = allData.map((row, index) => ({ ...row, originalIndex: index }))
+        .filter(row => {
+            if (currentViewSubtab === 'drafts') {
+                return row.status === 'draft';
+            } else {
+                return row.status !== 'draft';
+            }
+        });
+
+    if (filteredData.length === 0) {
+        const msg = currentViewSubtab === 'drafts' ? 'No drafts found.' : 'No submitted data found.';
+        tableContainer.innerHTML = `<p class="text-center text-gray-500 mt-8">${msg}</p>`;
         return;
     }
 
@@ -415,15 +508,16 @@ async function renderDataTable() {
     tableHTML += `<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>`;
     tableHTML += `</tr></thead><tbody class="bg-white divide-y divide-gray-200">`;
 
-    allData.forEach((row, index) => {
+    filteredData.forEach((row, i) => {
+        const index = row.originalIndex;
         tableHTML += `<tr data-index="${index}" class="cursor-pointer hover:bg-gray-50" onclick="openRowDetails(${index})">`;
         tableHTML += `<td class="px-3 py-4 whitespace-nowrap text-sm text-gray-700"><button onclick="event.stopPropagation(); editRow(${index})" title="Edit" class="p-2 rounded hover:bg-gray-100" aria-label="Edit">✏️</button></td>`;
-        tableHTML += `<td class="px-3 py-4 whitespace-nowrap text-sm text-gray-700">${index + 1}</td>`;
+        tableHTML += `<td class="px-3 py-4 whitespace-nowrap text-sm text-gray-700">${i + 1}</td>`;
         headersToShow.forEach(header => {
             tableHTML += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${row[header] || 'N/A'}</td>`;
         });
         tableHTML += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 space-x-2">
-            <button onclick="event.stopPropagation(); generateSummary(${index})" class="text-blue-600 hover:text-blue-800 font-semibold">✨</button>
+            ${currentViewSubtab !== 'drafts' ? `<button onclick="event.stopPropagation(); generateSummary(${index})" class="text-blue-600 hover:text-blue-800 font-semibold">✨</button>` : ''}
             <button onclick="event.stopPropagation(); handleRowDelete(${index})" title="Delete" aria-label="Delete" class="text-red-600 hover:text-red-800 font-semibold p-2">🗑️</button>
         </td>`;
         tableHTML += `</tr>`;
@@ -519,7 +613,8 @@ if (typeof module !== 'undefined' && module.exports) {
         showConfirmationModal,
         showAlertModal,
         closeConfirmationModal,
-        getPersistedMainTab
+        getPersistedMainTab,
+        switchViewSubtab
     };
 } else {
     window.UIModule = {
@@ -538,6 +633,7 @@ if (typeof module !== 'undefined' && module.exports) {
         showConfirmationModal,
         showAlertModal,
         closeConfirmationModal,
-        getPersistedMainTab
+        getPersistedMainTab,
+        switchViewSubtab
     };
 }

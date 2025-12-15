@@ -383,6 +383,64 @@ async function deleteRow(index) {
 }
 
 /**
+ * Save a draft to localStorage with encryption
+ * @param {Object} draftData - The draft data object
+ * @param {number|null} index - Index of existing draft to update, or null for new
+ * @returns {Promise<Object>} Result object { success: boolean, message: string }
+ */
+async function saveDraft(draftData, index = null) {
+    const allData = await getStoredData();
+    
+    // Check if we are updating an existing record
+    const isUpdate = index !== null && index >= 0 && index < allData.length;
+    
+    // Calculate current draft count
+    const currentDraftCount = allData.filter(item => item.status === 'draft').length;
+    
+    // Determine if we are adding a NEW draft (either new record or converting submitted to draft)
+    let isNewDraft = true;
+    if (isUpdate) {
+        // If updating, check if it was already a draft
+        if (allData[index].status === 'draft') {
+            isNewDraft = false;
+        }
+    }
+    
+    // Check limit if we are adding a new draft
+    if (isNewDraft) {
+        if (currentDraftCount >= 5) {
+            return { success: false, message: 'Draft limit reached (max 5). Please submit or delete existing drafts.' };
+        }
+    }
+    
+    // Prepare draft object
+    const draft = {
+        ...draftData,
+        status: 'draft',
+        lastEdited: new Date().toISOString(),
+        version: (draftData.version || 0) + 1
+    };
+    
+    if (isUpdate) {
+        allData[index] = draft;
+    } else {
+        allData.push(draft);
+    }
+    
+    await saveData(allData);
+    return { success: true, message: 'Draft saved successfully.' };
+}
+
+/**
+ * Get count of active drafts
+ * @returns {Promise<number>}
+ */
+async function getDraftCount() {
+    const allData = await getStoredData();
+    return allData.filter(item => item.status === 'draft').length;
+}
+
+/**
  * Clear all data from localStorage
  */
 function clearAllData() {
@@ -403,6 +461,8 @@ if (typeof module !== 'undefined' && module.exports) {
         importDataFromJSON,
         deleteRow,
         clearAllData,
+        saveDraft,
+        getDraftCount,
         encryptValue,
         decryptValue,
         encryptSensitiveFields,
@@ -420,6 +480,8 @@ if (typeof module !== 'undefined' && module.exports) {
         importDataFromJSON,
         deleteRow,
         clearAllData,
+        saveDraft,
+        getDraftCount,
         encryptValue,
         decryptValue,
         encryptSensitiveFields,

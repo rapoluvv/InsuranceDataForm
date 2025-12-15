@@ -141,6 +141,10 @@ window.addEventListener('modulesLoaded', function () {
                     entry.fam_children = [];
                 }
 
+                // Set status to submitted
+                entry.status = 'submitted';
+                entry.lastEdited = new Date().toISOString();
+
                 const allData = await window.getStoredData();
                 if (window.editingIndex !== null && window.editingIndex >= 0 && window.editingIndex < allData.length) {
                     allData[window.editingIndex] = entry;
@@ -166,6 +170,9 @@ window.addEventListener('modulesLoaded', function () {
                     alert('Data saved successfully!');
                 }
                 window.showMainTab('data-view');
+                if (window.UIModule && typeof window.UIModule.switchViewSubtab === 'function') {
+                    window.UIModule.switchViewSubtab('submitted');
+                }
             } else {
                 const showToast = window.showToast || (window.UIModule && window.UIModule.showToast);
                 if (typeof showToast === 'function') {
@@ -187,6 +194,19 @@ window.addEventListener('modulesLoaded', function () {
     }
 
     // Set up other event listeners
+    const saveDraftBtn = document.getElementById('save-draft-btn');
+    if (saveDraftBtn) {
+        saveDraftBtn.addEventListener('click', async function() {
+            const result = await window.handleSaveDraft();
+            if (result && result.success) {
+                if (window.UIModule) {
+                    if (typeof window.UIModule.showMainTab === 'function') window.UIModule.showMainTab('data-view');
+                    if (typeof window.UIModule.switchViewSubtab === 'function') window.UIModule.switchViewSubtab('drafts');
+                }
+            }
+        });
+    }
+
     const clearBtn = document.getElementById('clear-data');
     if (clearBtn) {
         clearBtn.addEventListener('click', function () {
