@@ -559,12 +559,21 @@ button[type="submit"]:hover,
 /* Danger button */
 .btn-danger,
 .bg-red-600 {
-    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    background: linear-gradient(135deg, var(--error), #dc2626) !important;
 }
+.bg-red-600:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4) !important;
+}
+
 
 /* Purple button */
 .bg-purple-600 {
     background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+}
+.bg-purple-600:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4) !important;
 }
 
 /* Table Styles */
