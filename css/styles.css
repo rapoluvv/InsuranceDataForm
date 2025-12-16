@@ -1185,9 +1185,27 @@ textarea:focus {
     color: var(--primary-start);
 }
 
+.review-section-edit-btn {
+    margin-left: auto;
+    margin-right: 0.75rem;
+    padding: 0.25rem;
+    color: var(--text-secondary);
+    border-radius: 9999px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.review-section-edit-btn:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--primary-start);
+}
+
 .review-field-row {
     display: grid;
-    grid-template-columns: 1fr 1.5fr auto;
+    grid-template-columns: 1fr 1.5fr;
     gap: 0.75rem;
     padding: 0.6rem 0;
     border-bottom: 1px solid var(--divider);
