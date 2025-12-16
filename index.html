@@ -777,8 +777,31 @@
                         <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)"
                                 class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr;
                                 Previous</button>
+                            <button type="button" onclick="navigateFormTab(1)"
+                                class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Next
+                                &rarr;</button>
+                        </div>
+
+                    </div>
+
+                    <!-- Review & Submit Tab -->
+                    <div class="form-section form-tab-panel hidden" data-tab-name="Review">
+                        <h2>Review & Submit</h2>
+                        <div id="review-summary-container">
+                            <!-- Review sections will be rendered here by JS -->
+                            <div class="flex justify-center p-8">
+                                <div class="loader"></div>
+                            </div>
+                        </div>
+                        <div id="review-validation-summary" class="mt-4">
+                            <!-- Validation issues summary -->
+                        </div>
+                        <div class="flex justify-between mt-6">
+                            <button type="button" onclick="navigateFormTab(-1)"
+                                class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">&larr;
+                                Previous</button>
                             <div class="flex space-x-4">
-                                <button type="button" id="save-draft-btn"
+                                <button type="button" id="save-draft-btn-review"
                                     class="bg-yellow-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-yellow-700 transition duration-300 shadow-lg">Save
                                     Draft</button>
                                 <button type="submit"
@@ -786,7 +809,6 @@
                                     Data</button>
                             </div>
                         </div>
-
                     </div>
                 </form>
             </div>
@@ -845,8 +867,12 @@
 
                     <!-- Subtabs for Drafts/Submitted -->
                     <div class="flex space-x-4 mb-4 border-b border-gray-200">
-                        <button id="subtab-submitted" class="py-2 px-4 text-sm font-medium text-blue-600 border-b-2 border-blue-600 focus:outline-none" onclick="UIModule.switchViewSubtab('submitted')">Submitted Data</button>
-                        <button id="subtab-drafts" class="py-2 px-4 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none" onclick="UIModule.switchViewSubtab('drafts')">Drafts</button>
+                        <button id="subtab-submitted"
+                            class="py-2 px-4 text-sm font-medium text-blue-600 border-b-2 border-blue-600 focus:outline-none"
+                            onclick="UIModule.switchViewSubtab('submitted')">Submitted Data</button>
+                        <button id="subtab-drafts"
+                            class="py-2 px-4 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none"
+                            onclick="UIModule.switchViewSubtab('drafts')">Drafts</button>
                     </div>
 
                     <div id="data-table-container" class="overflow-x-auto">

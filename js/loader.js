@@ -19,6 +19,7 @@
         ui: false,
         ai: false,
         utils: false,
+        review: false,
         app: false
     };
 
@@ -29,6 +30,7 @@
         ui: 'js/ui.js',
         ai: 'js/ai.js',
         utils: 'js/utils.js',
+        review: 'js/review.js',
         app: 'js/app.js'
     };
 
@@ -75,6 +77,10 @@
             await loadScript(MODULE_PATHS.utils);
             loadedModules.utils = true;
             console.log('✓ Utils module loaded');
+
+            await loadScript(MODULE_PATHS.review);
+            loadedModules.review = true;
+            console.log('✓ Review module loaded');
 
             await loadScript(MODULE_PATHS.app);
             loadedModules.app = true;
@@ -141,6 +147,12 @@
             window.showConfirmationModal = window.UIModule.showConfirmationModal;
             window.showAlertModal = window.UIModule.showAlertModal;
             window.closeConfirmationModal = window.UIModule.closeConfirmationModal;
+        }
+
+        // Review Module functions
+        if (window.ReviewModule) {
+            window.renderReviewPanel = window.ReviewModule.renderReviewPanel;
+            window.editReviewField = window.ReviewModule.editReviewField;
         }
 
         // AI Module functions
