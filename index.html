@@ -120,16 +120,16 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div><label for="mobile_adhar">Mobile (Aadhaar) <span
                                         class="required-asterisk">*</span></label><input type="tel" id="mobile_adhar"
-                                    name="mobile_adhar" class="mt-1" pattern="\d{10}"
+                                    name="mobile_adhar" maxlength="10" class="mt-1" pattern="\d{10}"
                                     title="Please enter a 10-digit mobile number" required><span
                                     class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div><label for="mobile">Mobile </label><input type="tel" id="mobile" name="mobile"
-                                    class="mt-1" pattern="\d{10}" title="Please enter a 10-digit mobile number"><span
+                                    class="mt-1" pattern="\d{10}" maxlength="10" title="Please enter a 10-digit mobile number"><span
                                     class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div><label for="email">E-mail </label><input type="email" id="email" name="email"
                                     class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div><label for="whatsapp">Whatsapp</label><input type="tel" id="whatsapp" name="whatsapp"
-                                    class="mt-1" pattern="\d{10}"><span
+                                    class="mt-1" pattern="\d{10}" maxlength="10"><span
                                     class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div><label for="dob">DOB <span class="required-asterisk">*</span></label><input type="date"
                                     id="dob" name="dob" class="mt-1" required><span
@@ -250,8 +250,8 @@
                                 </select>
                                 <span class="error-message text-red-500 text-sm mt-1"></span>
                             </div>
-                            <div><label for="sum_assured">Sum Assured</label><input type="number" id="sum_assured"
-                                    min="0" name="sum_assured" class="mt-1"><span
+                            <div><label for="sum_assured">Sum Assured</label><input type="text" inputmode="numeric" 
+                                id="sum_assured" placeholder="Sum Assured" min="0" name="sum_assured" class="mt-1"><span
                                     class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div>
                                 <label for="ab_addb">Accidental Benefit</label>
@@ -273,7 +273,8 @@
                                 <span class="error-message text-red-500 text-sm mt-1"></span>
                             </div>
                             <div><label for="premium">Premium <span class="required-asterisk">*</span></label><input
-                                    type="number" id="premium" min="0" name="premium" class="mt-1" required><span
+                                    type="text" inputmode="numeric" id="premium" min="0" placeholder="Premium"
+                                    name="premium" class="mt-1" required><span
                                     class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div>
                                 <label for="dating_back">Dating Back</label>
@@ -300,17 +301,17 @@
                                 <span class="error-message text-red-500 text-sm mt-1"></span>
                             </div>
                             <div><label for="boc_number">BOC Number</label><input type="text" id="boc_number"
-                                    name="boc_number" class="mt-1" placeholder="Enter BOC number"><span
+                                    name="boc_number" class="mt-1" placeholder="BOC number"><span
                                     class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div><label for="boc_date">BOC Date</label><input type="date" id="boc_date" name="boc_date"
                                     class="mt-1"><span class="error-message text-red-500 text-sm mt-1"></span></div>
-                            <div><label for="boc_amt">BOC Amt</label><input type="number" id="boc_amt" min="0"
-                                    name="boc_amt" class="mt-1"><span
+                            <div><label for="boc_amt">BOC Amount</label><input type="text" inputmode="numeric" id="boc_amt" 
+                                min="0" name="boc_amt" class="mt-1" placeholder="BOC amount"><span
                                     class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div><label for="doc">DOC</label><input type="date" id="doc" name="doc" class="mt-1"><span
                                     class="error-message text-red-500 text-sm mt-1"></span></div>
                             <div><label for="policy_no">Policy No</label><input type="text" id="policy_no"
-                                    name="policy_no" class="mt-1" placeholder="Enter Policy number"><span
+                                    name="policy_no" class="mt-1" placeholder="Policy number"><span
                                     class="error-message text-red-500 text-sm mt-1"></span></div>
                         </div>
                         <div class="flex justify-between mt-6"><button type="button" onclick="navigateFormTab(-1)"
