@@ -278,6 +278,14 @@ function showFormTab(tabIndex) {
     // Mark this tab as visited
     visitedTabs.add(tabIndex);
     updateProgress();
+
+    // Check if this is the Review tab (data-tab-name="Review")
+    if (formTabPanels[tabIndex].getAttribute('data-tab-name') === 'Review') {
+        if (typeof window.renderReviewPanel === 'function') {
+            window.renderReviewPanel();
+        }
+    }
+
     try {
         if (typeof window.scrollElementToTop === 'function') {
             window.scrollElementToTop(formTabPanels[tabIndex]);
@@ -1345,23 +1353,23 @@ async function handleSaveDraft() {
     // If we are editing a submitted record, editingIndex points to it.
     // We pass this index to saveDraft. The data module will handle the status change to 'draft'.
     // This effectively moves the record from 'submitted' to 'draft'.
-    
+
     const indexToUpdate = window.editingIndex;
 
     const result = await window.DataModule.saveDraft(entry, indexToUpdate);
-    
+
     const showToast = window.showToast || (window.UIModule && window.UIModule.showToast);
-    
+
     if (result.success) {
         if (typeof showToast === 'function') {
             showToast(result.message, 'success');
         } else {
             alert(result.message);
         }
-        
+
         // Reset form and state
         window.resetFormState();
-        
+
     } else {
         if (typeof showToast === 'function') {
             showToast(result.message, 'error');
@@ -1369,7 +1377,7 @@ async function handleSaveDraft() {
             alert(result.message);
         }
     }
-    
+
     return result;
 }
 

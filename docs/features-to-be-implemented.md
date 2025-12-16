@@ -44,12 +44,11 @@ Problem: users only see their inputs after submitting.
 Goals and suggested features:
 - A Review panel (sticky sidebar or final wizard tab) showing headings and filled values.
 - Highlight missing or invalid mandatory inputs and provide inline edit links to jump back.
-- Option to export the review to PDF or CSV before submission.
 
 Implementation notes:
 - Reuse CSV_HEADERS to drive the summary rendering and reuse validation routines to flag issues.
 - Provide an Edit action per row that focuses the related input/tab.
-- Acceptance: users can see all values, fix issues from the review, and submit successfully.
+- Acceptance: users can see all values, fix issues after the review, and submit successfully.
 
 ## 4. Boost validation & accessibility support
 
