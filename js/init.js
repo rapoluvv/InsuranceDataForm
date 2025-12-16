@@ -490,4 +490,78 @@ window.addEventListener('modulesLoaded', function () {
     dateObserver.observe(document.body, { childList: true, subtree: true });
 
     console.log('Application initialized successfully');
+
+    // ========================================================================
+    // REFRESH WARNING: Offer draft/discard choice before a hard reload
+    // ========================================================================
+    let refreshPromptOpen = false;
+    let skipRefreshPrompt = false;
+
+    const isFormViewActive = () => {
+        const formView = document.getElementById('form-view');
+        return formView && !formView.classList.contains('hidden');
+    };
+
+    const isEditingExistingRecord = () => {
+        return typeof window.editingIndex === 'number' && window.editingIndex !== null;
+    };
+
+    const shouldPromptBeforeUnload = () => {
+        return (window.isFormDirty || isEditingExistingRecord()) && isFormViewActive() && !skipRefreshPrompt;
+    };
+
+    const reloadPageSilently = () => {
+        skipRefreshPrompt = true;
+        refreshPromptOpen = false;
+        window.location.reload();
+    };
+
+    const discardAndReload = () => {
+        if (typeof window.resetFormState === 'function') {
+            window.resetFormState();
+        }
+        reloadPageSilently();
+    };
+
+    const saveDraftAndReload = async () => {
+        const result = await window.handleSaveDraft();
+        if (result && result.success) {
+            reloadPageSilently();
+        } else {
+            refreshPromptOpen = false;
+        }
+    };
+
+    const showRefreshPrompt = () => {
+        if (!window.UIModule || refreshPromptOpen) return;
+        refreshPromptOpen = true;
+        window.UIModule.showConfirmationModal(
+            'Unsaved Changes',
+            'You are about to refresh while working on the data entry form. Save a draft before reloading or discard your changes?',
+            discardAndReload,
+            () => { refreshPromptOpen = false; },
+            'Discard & Reload',
+            'Stay on Page',
+            'Save Draft & Reload',
+            () => saveDraftAndReload()
+        );
+    };
+
+    window.addEventListener('beforeunload', function (event) {
+        if (!shouldPromptBeforeUnload()) return;
+        event.preventDefault();
+        event.returnValue = '';
+        showRefreshPrompt();
+        return '';
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (!shouldPromptBeforeUnload()) return;
+        const key = event.key ? event.key.toLowerCase() : '';
+        const isRefreshKey = key === 'f5' || (key === 'r' && (event.ctrlKey || event.metaKey));
+        if (isRefreshKey) {
+            event.preventDefault();
+            showRefreshPrompt();
+        }
+    });
 });
