@@ -142,8 +142,21 @@ function renderSection(container, title, tabIndex, fields) {
     header.className = 'review-section-header';
     header.innerHTML = `
         <span>${title}</span>
+        <button type="button" class="review-section-edit-btn" title="Edit ${title}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+        </button>
         <span class="transform transition-transform duration-200">▼</span>
     `;
+
+    // Edit button click
+    const editBtn = header.querySelector('.review-section-edit-btn');
+    editBtn.onclick = (e) => {
+        e.stopPropagation();
+        editReviewField(tabIndex);
+    };
+
     header.onclick = () => toggleReviewSection(sectionEl);
     sectionEl.appendChild(header);
 
@@ -169,9 +182,6 @@ function renderSection(container, title, tabIndex, fields) {
             <div class="review-field-value ${isMissing ? 'missing' : ''} ${isInvalid ? 'invalid' : ''}">
                 ${(val === '' && isMissing) ? 'Required' : (val || '-')}
             </div>
-            <div class="text-right">
-                <span class="review-edit-link" onclick="editReviewField(${tabIndex}, '${f.id}')">Edit</span>
-            </div>
         `;
         content.appendChild(row);
     });
@@ -195,8 +205,20 @@ function renderNomineeSection(container) {
     header.className = 'review-section-header';
     header.innerHTML = `
         <span>Nominee & Appointee</span>
+        <button type="button" class="review-section-edit-btn" title="Edit Nominees">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+        </button>
         <span class="transform transition-transform duration-200">▼</span>
     `;
+
+    const editBtn = header.querySelector('.review-section-edit-btn');
+    editBtn.onclick = (e) => {
+        e.stopPropagation();
+        editReviewField(4, 'nominees-repeater');
+    };
+
     header.onclick = () => toggleReviewSection(sectionEl);
     sectionEl.appendChild(header);
 
@@ -233,12 +255,6 @@ function renderNomineeSection(container) {
             nomContainer.appendChild(nomDiv);
         });
     }
-    // Edit link for nominees
-    const nomEdit = document.createElement('div');
-    nomEdit.className = 'text-right mt-1';
-    nomEdit.innerHTML = `<span class="review-edit-link" onclick="editReviewField(4, 'nominees-repeater')">Edit Nominees</span>`;
-    nomContainer.appendChild(nomEdit);
-
     content.appendChild(nomContainer);
 
     // Appointee
@@ -263,9 +279,6 @@ function renderNomineeSection(container) {
             row.innerHTML = `
                 <div class="review-field-label">${f.label}</div>
                 <div class="review-field-value">${val || '-'}</div>
-                <div class="text-right">
-                    <span class="review-edit-link" onclick="editReviewField(4, '${f.id}')">Edit</span>
-                </div>
             `;
             appContainer.appendChild(row);
         });
@@ -287,8 +300,20 @@ function renderMedicalSection(container) {
     header.className = 'review-section-header';
     header.innerHTML = `
         <span>Family & Medical Details</span>
+        <button type="button" class="review-section-edit-btn" title="Edit Medical Details">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+        </button>
         <span class="transform transition-transform duration-200">▼</span>
     `;
+
+    const editBtn = header.querySelector('.review-section-edit-btn');
+    editBtn.onclick = (e) => {
+        e.stopPropagation();
+        editReviewField(6);
+    };
+
     header.onclick = () => toggleReviewSection(sectionEl);
     sectionEl.appendChild(header);
 
@@ -310,7 +335,6 @@ function renderMedicalSection(container) {
                 <div class="review-field-row">
                     <div class="review-field-label">${f.label}</div>
                     <div class="review-field-value ${isMissing ? 'missing' : ''}">${(val === '' && isMissing) ? 'Required' : (val || '-')}</div>
-                    <div class="text-right"><span class="review-edit-link" onclick="editReviewField(6, '${editId || f.id}')">Edit</span></div>
                 </div>
             `;
         });
@@ -363,7 +387,6 @@ function renderMedicalSection(container) {
         <div class="review-field-row">
             <div class="review-field-label">Numbers</div>
             <div class="review-field-value">Brothers: ${nBros}, Sisters: ${nSis}, Children: ${nChild}</div>
-            <div class="text-right"><span class="review-edit-link" onclick="editReviewField(6, 'num_brothers')">Edit</span></div>
         </div>
     `;
 
@@ -389,7 +412,6 @@ function renderMedicalSection(container) {
                     <div class="review-field-row">
                         <div class="review-field-label">Age</div>
                         <div class="review-field-value">${ageVal}</div>
-                        <div class="text-right"></div>
                     </div>
                 `;
 
@@ -399,7 +421,6 @@ function renderMedicalSection(container) {
                     <div class="review-field-row">
                         <div class="review-field-label">State</div>
                         <div class="review-field-value">${stateVal}</div>
-                        <div class="text-right"></div>
                     </div>
                 `;
 
@@ -413,17 +434,14 @@ function renderMedicalSection(container) {
                         <div class="review-field-row">
                             <div class="review-field-label">Age at Death</div>
                             <div class="review-field-value">${diedAge}</div>
-                            <div class="text-right"></div>
                         </div>
                         <div class="review-field-row">
                             <div class="review-field-label">Death Year</div>
                             <div class="review-field-value">${diedYear}</div>
-                            <div class="text-right"></div>
                         </div>
                         <div class="review-field-row">
                             <div class="review-field-label">Cause of Death</div>
                             <div class="review-field-value">${diedCause}</div>
-                            <div class="text-right"></div>
                         </div>
                      `;
                 }
@@ -472,8 +490,20 @@ function renderPreviousPoliciesSection(container) {
     header.className = 'review-section-header';
     header.innerHTML = `
         <span>Previous Policy Details</span>
+        <button type="button" class="review-section-edit-btn" title="Edit Policies">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+        </button>
         <span class="transform transition-transform duration-200">▼</span>
     `;
+
+    const editBtn = header.querySelector('.review-section-edit-btn');
+    editBtn.onclick = (e) => {
+        e.stopPropagation();
+        editReviewField(7, 'previous-policies-repeater');
+    };
+
     header.onclick = () => toggleReviewSection(sectionEl);
     sectionEl.appendChild(header);
 
@@ -502,9 +532,6 @@ function renderPreviousPoliciesSection(container) {
     if (policies.length === 0) {
         content.innerHTML = `
             <div class="text-gray-500 italic p-2">No previous policies</div>
-            <div class="text-right mt-2">
-                <span class="review-edit-link" onclick="editReviewField(7, 'previous-policies-repeater')">Add Previous Policy</span>
-            </div>
         `;
     } else {
         content.innerHTML = `<div class="mb-2 text-sm font-medium text-gray-700">${policies.length} previous policy(ies)</div>`;
@@ -521,11 +548,6 @@ function renderPreviousPoliciesSection(container) {
              `;
             content.appendChild(row);
         });
-
-        const editLink = document.createElement('div');
-        editLink.className = 'text-right mt-2';
-        editLink.innerHTML = `<span class="review-edit-link" onclick="editReviewField(7, 'previous-policies-repeater')">Edit Policies</span>`;
-        content.appendChild(editLink);
     }
 
     sectionEl.appendChild(content);
